@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.OiConstants;
+import frc.robot.Constants.JoystickConstants;
 import frc.robot.Constants.SwerveConstants;
 
 /** The subsystem that handles swerve drive. */
@@ -26,12 +26,8 @@ public class SwerveDrive extends SubsystemBase {
     private final AHRS gyro;
     private final double gyroOffset = 0.0;
 
-    private final SwerveDriveOdometry odometry;
-    private Field2d field;
-
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
-        // Init the swerve modules
         frontLeft = new SwerveModule(21, false, 22, false, 23, 4.516 - Math.PI);
         frontRight = new SwerveModule(31, false, 32, false, 33, 5.604);
         backLeft = new SwerveModule(41, false, 42, false, 43, 5.647 - Math.PI);
@@ -48,28 +44,11 @@ public class SwerveDrive extends SubsystemBase {
                 System.out.println(e);
             }
         }).start();
-
-        odometry = new SwerveDriveOdometry(SwerveConstants.driveKinematics, new Rotation2d(0),
-                new SwerveModulePosition[] {
-                        frontLeft.getPosition(),
-                        frontRight.getPosition(),
-                        backLeft.getPosition(),
-                        backRight.getPosition()
-                }, new Pose2d(0, 0, Rotation2d.fromDegrees(-gyroOffset)));
-
-        field = new Field2d();
     }
 
     /** Run approx. every 20 ms. */
     @Override
-    public void periodic() {
-        odometry.update(getRotation2d(), new SwerveModulePosition[] {
-                frontLeft.getPosition(), frontRight.getPosition(),
-                backLeft.getPosition(), backRight.getPosition()
-        });
-        field.setRobotPose(odometry.getPoseMeters());
-        SmartDashboard.putData("Field", field);
-    }
+    public void periodic() {}
 
     /**
      * Gets the heading of the robot clamped within 360 degrees.
@@ -77,17 +56,11 @@ public class SwerveDrive extends SubsystemBase {
      * @return Robot heading in Rotation2d
      */
     public Rotation2d getRotation2d() {
-        // if (gyro.isMagnetometerCalibrated()) {
-        // return Rotation2d.fromDegrees(gyro.getFusedHeading());
-        // }
-
         // We have to invert the angle of the NavX so that rotating the robot
         // counter-clockwise makes the angle increase.
-        // return Rotation2d.fromDegrees((360.0 - gyro.getYaw()));
         return Rotation2d.fromDegrees(360 - gyro.getYaw() - gyroOffset);
     }
 
-    // @TODO implement some form of usage in OI for testing
     public void zeroGyro() {
         gyro.zeroYaw();
     }
@@ -103,12 +76,10 @@ public class SwerveDrive extends SubsystemBase {
     public void setDirection(double xSpeed, double ySpeed, double turningSpeed, boolean fieldOriented) {
         ChassisSpeeds chassisSpeed;
 
-        // Multiply joystick speeds by their multipliers
-        xSpeed *= OiConstants.xySpeedMultiplier;
-        ySpeed *= OiConstants.xySpeedMultiplier;
-        turningSpeed *= OiConstants.turningSpeedMultiplier;
+        xSpeed *= JoystickConstants.xySpeedMultiplier;
+        ySpeed *= JoystickConstants.xySpeedMultiplier;
+        turningSpeed *= JoystickConstants.turningSpeedMultiplier;
 
-        // Convert speeds to chassis speeds
         if (fieldOriented) {
             chassisSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(ySpeed, xSpeed, turningSpeed, this.getRotation2d());
         } else {
@@ -116,7 +87,6 @@ public class SwerveDrive extends SubsystemBase {
             chassisSpeed = new ChassisSpeeds(ySpeed, xSpeed, turningSpeed);
         }
 
-        // Create swerve module states for the desired movement and push to subsystem
         SwerveModuleState[] moduleStates = SwerveConstants.driveKinematics.toSwerveModuleStates(chassisSpeed);
         this.setStates(moduleStates, true);
     }
