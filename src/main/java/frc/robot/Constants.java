@@ -26,6 +26,7 @@ public final class Constants {
 
         public static final double trackWidth = Units.inchesToMeters(23.5);
         public static final double wheelBase = Units.inchesToMeters(21.5);
+
         public static final Translation2d locationFL =
                 new Translation2d(wheelBase / 2, trackWidth / 2);
         public static final Translation2d locationFR =
@@ -34,6 +35,16 @@ public final class Constants {
                 new Translation2d(-wheelBase / 2, trackWidth / 2);
         public static final Translation2d locationBR =
                 new Translation2d(-wheelBase / 2, -trackWidth / 2);
+
+        public static final double offsetFL = 0.219;
+        public static final double offsetFR = 0.876;
+        public static final double offsetBL = 0.397;
+        public static final double offsetBR = 0.720;
+
+        // frontLeft = new SwerveModule(21, false, 22, false, 23, 4.516 - Math.PI);
+        // frontRight = new SwerveModule(31, false, 32, false, 33, 5.604);
+        // backLeft = new SwerveModule(41, false, 42, false, 43, 5.647 - Math.PI);
+        // backRight = new SwerveModule(51, false, 52, false, 53, 4.522);
         public static final SwerveDriveKinematics driveKinematics =
                 new SwerveDriveKinematics(locationFL, locationFR, locationBL, locationBR);
     }
@@ -46,8 +57,8 @@ public final class Constants {
         public static final double joystickDeadZone = 0.1;
         public static final double triggerDeadZone = 0.1;
 
-        public static final double xySpeedMultiplier = 5; // Speed multiplier in m/s(?)
-        public static final double turningSpeedMultiplier = 1.25 * Math.PI;
+        public static final double xySpeedMultiplier = 1; // Speed multiplier in m/s(?)
+        public static final double turningSpeedMultiplier = 1.25;
         public static final double slowTurningDivisor = 2;
     }
 }

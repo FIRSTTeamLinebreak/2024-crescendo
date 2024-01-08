@@ -26,6 +26,7 @@ public class SwerveModule {
 
     // CAN Coder
     private final CANcoder canCoder;
+    private final double canCoderOffset;
 
     /**
      * Creates a new swerve module.
@@ -53,15 +54,16 @@ public class SwerveModule {
         turningController.setIdleMode(IdleMode.kBrake);
 
         turningPid = new PIDController(0.7, 0.0, 0.0);
-        turningPid.enableContinuousInput(0, 2 * Math.PI);
-        turningPid.setTolerance(0.05);
+        turningPid.enableContinuousInput(0.0, 1.0);
+        turningPid.setTolerance(0.005);
 
         canCoder = new CANcoder(coderId);
 
         CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        config.MagnetSensor.MagnetOffset = coderOffset;
+        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         canCoder.getConfigurator().apply(config);
+
+        this.canCoderOffset = coderOffset;
     }
 
     /**
@@ -79,6 +81,7 @@ public class SwerveModule {
                     String.format(
                             "Speed: %.3f, Rotation: %.3f",
                             state.speedMetersPerSecond, state.angle.getRadians()));
+            SmartDashboard.putNumber("Swerve " + Integer.toString(driveController.getDeviceID() - 10).charAt(0) + " Current Rotation", getTurningPosition());
         }
 
         // Implements a "deadzone" so releasing the joystick won't make the wheels reset to 0
@@ -90,7 +93,7 @@ public class SwerveModule {
         // Optimize movements to not move more than 90 deg for any new state
         state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition()));
         driveController.set(state.speedMetersPerSecond / SwerveConstants.drivePhysicalMaxSpeed);
-        turningController.set(turningPid.calculate(getTurningPosition(), state.angle.getRadians()));
+        turningController.set(turningPid.calculate(getTurningPosition(), state.angle.getRadians() / (2 * Math.PI)));
     }
 
     /** Stops the swerve module. */
@@ -105,7 +108,7 @@ public class SwerveModule {
      * @return Turning motor position
      */
     public double getTurningPosition() {
-        return canCoder.getPosition().getValueAsDouble();
+        return canCoder.getPosition().getValueAsDouble() - canCoderOffset;
     }
 
     /**
@@ -114,6 +117,6 @@ public class SwerveModule {
      * @return Turning motor position
      */
     public double getTurningPositionReadable() {
-        return canCoder.getPosition().getValueAsDouble() % 2 * Math.PI;
+        return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1) * 2 * Math.PI;
     }
 }

@@ -2,15 +2,11 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.JoystickConstants;
@@ -28,10 +24,10 @@ public class SwerveDrive extends SubsystemBase {
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
-        frontLeft = new SwerveModule(21, false, 22, false, 23, 4.516 - Math.PI);
-        frontRight = new SwerveModule(31, false, 32, false, 33, 5.604);
-        backLeft = new SwerveModule(41, false, 42, false, 43, 5.647 - Math.PI);
-        backRight = new SwerveModule(51, false, 52, false, 53, 4.522);
+        frontLeft = new SwerveModule(21, false, 22, false, 23, SwerveConstants.offsetFL);
+        frontRight = new SwerveModule(31, false, 32, false, 33, SwerveConstants.offsetFR);
+        backLeft = new SwerveModule(41, false, 42, false, 43, SwerveConstants.offsetBL);
+        backRight = new SwerveModule(51, false, 52, false, 53, SwerveConstants.offsetBR);
 
         gyro = new AHRS(SerialPort.Port.kMXP);
         // Can't call `gyro.reset()` when the gyro is calibration so we defer calling it on another thread
