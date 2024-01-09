@@ -24,10 +24,10 @@ public class SwerveDrive extends SubsystemBase {
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
-        frontLeft = new SwerveModule(21, false, 22, false, 23, SwerveConstants.offsetFL);
-        frontRight = new SwerveModule(31, false, 32, false, 33, SwerveConstants.offsetFR);
-        backLeft = new SwerveModule(41, false, 42, false, 43, SwerveConstants.offsetBL);
-        backRight = new SwerveModule(51, false, 52, false, 53, SwerveConstants.offsetBR);
+        frontLeft = new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
+        frontRight = new SwerveModule(31, false, 32, false, 33, SwerveConstants.Dimensions.magOffsetFR);
+        backLeft = new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
+        backRight = new SwerveModule(51, false, 52, false, 53, SwerveConstants.Dimensions.magOffsetBR);
 
         gyro = new AHRS(SerialPort.Port.kMXP);
         // Can't call `gyro.reset()` when the gyro is calibration so we defer calling it on another thread
@@ -77,13 +77,13 @@ public class SwerveDrive extends SubsystemBase {
         turningSpeed *= JoystickConstants.turningSpeedMultiplier;
 
         if (fieldOriented) {
-            chassisSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(ySpeed, xSpeed, turningSpeed, this.getRotation2d());
+            chassisSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, turningSpeed, this.getRotation2d());
         } else {
             // The robot is rotated 90 degrees from what we expect so we change how we pass the speeds
-            chassisSpeed = new ChassisSpeeds(ySpeed, xSpeed, turningSpeed);
+            chassisSpeed = new ChassisSpeeds(xSpeed, ySpeed, turningSpeed);
         }
 
-        SwerveModuleState[] moduleStates = SwerveConstants.driveKinematics.toSwerveModuleStates(chassisSpeed);
+        SwerveModuleState[] moduleStates = SwerveConstants.Kinematics.driveKinematics.toSwerveModuleStates(chassisSpeed);
         this.setStates(moduleStates, true);
     }
 
@@ -96,7 +96,7 @@ public class SwerveDrive extends SubsystemBase {
      */
     private void setStates(SwerveModuleState[] desiredStates, boolean log) {
         // Normalize the speed so we don attempt to overpower motors
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConstants.drivePhysicalMaxSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
 
         frontLeft.setState(desiredStates[0], log);
         frontRight.setState(desiredStates[1], log);

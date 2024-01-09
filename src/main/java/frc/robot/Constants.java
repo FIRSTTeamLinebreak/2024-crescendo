@@ -15,38 +15,46 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
     /** Contstants pertaining to the Swerve Modules */
     public static final class SwerveConstants {
-        public static final double wheelDiameter = Units.inchesToMeters(2);
-        public static final double driveGearRatio = 6.12;
+        public static final class Dimensions {
+            public static final double wheelDiameter = Units.inchesToMeters(2);
+            public static final double driveGearRatio = 6.12;
 
-        public static final double driveRotToMeters =
+            public static final double driveRotToMeters =
                 ((2 * Math.PI * wheelDiameter) / driveGearRatio) / 2048;
-        public static final double driveRpsToMps = driveRotToMeters / 10 * 60 * 2;
+            public static final double driveRpsToMps = driveRotToMeters / 10 * 60 * 2;
 
-        public static final double drivePhysicalMaxSpeed = 5.486;
+            public static final double drivePhysicalMaxSpeed = 5.486;
 
-        public static final double trackWidth = Units.inchesToMeters(23.5);
-        public static final double wheelBase = Units.inchesToMeters(21.5);
+            public static final double trackWidth = Units.inchesToMeters(23.5);
+            public static final double wheelBase = Units.inchesToMeters(21.5);
 
-        public static final Translation2d locationFL =
-                new Translation2d(wheelBase / 2, trackWidth / 2);
-        public static final Translation2d locationFR =
-                new Translation2d(wheelBase / 2, -trackWidth / 2);
-        public static final Translation2d locationBL =
-                new Translation2d(-wheelBase / 2, trackWidth / 2);
-        public static final Translation2d locationBR =
-                new Translation2d(-wheelBase / 2, -trackWidth / 2);
+            public static final double magOffsetFL = 0.469;
+            public static final double magOffsetFR = 0.126;
+            public static final double magOffsetBL = 0.853;
+            public static final double magOffsetBR = 0.520;
+        }
 
-        public static final double offsetFL = 0.219;
-        public static final double offsetFR = 0.876;
-        public static final double offsetBL = 0.397;
-        public static final double offsetBR = 0.720;
+        public static final class Kinematics {
+            public static final Translation2d locationFL =
+                new Translation2d(Dimensions.wheelBase / 2, Dimensions.trackWidth / 2);
+            public static final Translation2d locationFR =
+                new Translation2d(Dimensions.wheelBase / 2, -Dimensions.trackWidth / 2);
+            public static final Translation2d locationBL =
+                new Translation2d(-Dimensions.wheelBase / 2, Dimensions.trackWidth / 2);
+            public static final Translation2d locationBR =
+                new Translation2d(-Dimensions.wheelBase / 2, -Dimensions.trackWidth / 2);
 
-        // frontLeft = new SwerveModule(21, false, 22, false, 23, 4.516 - Math.PI);
-        // frontRight = new SwerveModule(31, false, 32, false, 33, 5.604);
-        // backLeft = new SwerveModule(41, false, 42, false, 43, 5.647 - Math.PI);
-        // backRight = new SwerveModule(51, false, 52, false, 53, 4.522);
-        public static final SwerveDriveKinematics driveKinematics =
+            public static final SwerveDriveKinematics driveKinematics =
                 new SwerveDriveKinematics(locationFL, locationFR, locationBL, locationBR);
+        }
+
+        public static final class PIDConstants {
+            public static final double kP= 0.7;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+                    
+            public static final double kT = 0.005;
+        }
     }
 
     /** Constants pertaining to the joystick. */

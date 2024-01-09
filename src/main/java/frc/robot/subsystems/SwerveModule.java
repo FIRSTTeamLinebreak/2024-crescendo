@@ -53,9 +53,13 @@ public class SwerveModule {
         turningController.restoreFactoryDefaults(true);
         turningController.setIdleMode(IdleMode.kBrake);
 
-        turningPid = new PIDController(0.7, 0.0, 0.0);
+        turningPid =
+                new PIDController(
+                        SwerveConstants.PIDConstants.kP,
+                        SwerveConstants.PIDConstants.kI,
+                        SwerveConstants.PIDConstants.kD);
         turningPid.enableContinuousInput(0.0, 1.0);
-        turningPid.setTolerance(0.005);
+        turningPid.setTolerance(SwerveConstants.PIDConstants.kT);
 
         canCoder = new CANcoder(coderId);
 
@@ -81,7 +85,11 @@ public class SwerveModule {
                     String.format(
                             "Speed: %.3f, Rotation: %.3f",
                             state.speedMetersPerSecond, state.angle.getRadians()));
-            SmartDashboard.putNumber("Swerve " + Integer.toString(driveController.getDeviceID() - 10).charAt(0) + " Current Rotation", getTurningPosition());
+            SmartDashboard.putNumber(
+                    "Swerve "
+                            + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
+                            + " Current Rotation",
+                    getTurningPosition());
         }
 
         // Implements a "deadzone" so releasing the joystick won't make the wheels reset to 0
@@ -92,8 +100,11 @@ public class SwerveModule {
 
         // Optimize movements to not move more than 90 deg for any new state
         state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition()));
-        driveController.set(state.speedMetersPerSecond / SwerveConstants.drivePhysicalMaxSpeed);
-        turningController.set(turningPid.calculate(getTurningPosition(), state.angle.getRadians() / (2 * Math.PI)));
+        driveController.set(
+                state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
+        turningController.set(
+                turningPid.calculate(
+                        getTurningPosition(), state.angle.getRadians() / (2 * Math.PI)));
     }
 
     /** Stops the swerve module. */
@@ -117,6 +128,8 @@ public class SwerveModule {
      * @return Turning motor position
      */
     public double getTurningPositionReadable() {
-        return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1) * 2 * Math.PI;
+        return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1)
+                * 2
+                * Math.PI;
     }
 }
