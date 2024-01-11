@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.JoystickConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.JoystickDriveCommand;
+import frc.robot.commands.Test;
+import frc.robot.subsystems.Launcher;
 import frc.robot.subsystems.SwerveDrive;
 import frc.robot.subsystems.Vision;
 
@@ -22,6 +24,7 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final SwerveDrive m_swerveDrive = new SwerveDrive();
     private final Vision m_vision = new Vision("OV5647");
+    private final Launcher m_launcher = new Launcher(20, 42);
 
     private final PIDController visionPID = new PIDController(0.02, 0, 0);
 
@@ -52,6 +55,7 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         m_swerveDrive.setDefaultCommand(m_SwerveDriveCommand);
+        m_driverController.a().onTrue(new Test(m_launcher));
     }
 
     /**
