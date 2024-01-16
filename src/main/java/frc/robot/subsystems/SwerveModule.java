@@ -12,7 +12,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import frc.robot.Constants.SwerveConstants;
 
 /** An individual swerve module. */
@@ -99,7 +98,7 @@ public class SwerveModule {
         }
 
         // Optimize movements to not move more than 90 deg for any new state
-        // state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition()));
+        state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
         driveController.set(
                 state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
         turningController.set(
