@@ -24,10 +24,10 @@ public class SwerveDrive extends SubsystemBase {
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
-        frontLeft = new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
-        frontRight = new SwerveModule(31, false, 32, false, 33, SwerveConstants.Dimensions.magOffsetFR);
-        backLeft = new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
-        backRight = new SwerveModule(51, false, 52, false, 53, SwerveConstants.Dimensions.magOffsetBR);
+        frontRight = new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
+        frontLeft = new SwerveModule(31, false, 32, false, 33, SwerveConstants.Dimensions.magOffsetFR);
+        backRight = new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
+        backLeft = new SwerveModule(51, false, 52, false, 53, SwerveConstants.Dimensions.magOffsetBR);
 
         gyro = new AHRS(SerialPort.Port.kMXP);
         // Can't call `gyro.reset()` when the gyro is calibration so we defer calling it on another thread

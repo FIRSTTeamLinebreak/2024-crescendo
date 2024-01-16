@@ -34,7 +34,7 @@ public class RobotContainer {
     private final JoystickDriveCommand m_SwerveDriveCommand =
             new JoystickDriveCommand(
                     m_swerveDrive,
-                    () -> m_driverController.getLeftX() * -1,
+                    () -> m_driverController.getLeftX(),
                     () -> m_driverController.getLeftY() * -1,
                     () -> {
                         // Rotation

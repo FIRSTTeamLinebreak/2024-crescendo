@@ -49,8 +49,8 @@ public class SwerveModule {
         driveController.setInverted(isDriveReversed);
 
         turningController = new CANSparkMax(turningId, MotorType.kBrushless);
-        turningController.setInverted(isTurningReversed);
         turningController.restoreFactoryDefaults(true);
+        turningController.setInverted(isTurningReversed);
         turningController.setIdleMode(IdleMode.kBrake);
 
         turningPid =
@@ -64,7 +64,7 @@ public class SwerveModule {
         canCoder = new CANcoder(coderId);
 
         CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         canCoder.getConfigurator().apply(config);
 
         this.canCoderOffset = coderOffset;
@@ -99,7 +99,7 @@ public class SwerveModule {
         }
 
         // Optimize movements to not move more than 90 deg for any new state
-        state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition()));
+        // state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition()));
         driveController.set(
                 state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
         turningController.set(

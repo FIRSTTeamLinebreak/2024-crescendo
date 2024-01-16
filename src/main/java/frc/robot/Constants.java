@@ -32,10 +32,10 @@ public final class Constants {
             // public static final double magOffsetFR = 0.126;
             // public static final double magOffsetBL = 0.853;
             // public static final double magOffsetBR = 0.520;
-            public static final double magOffsetFL = 0;
-            public static final double magOffsetFR = 0;
-            public static final double magOffsetBL = 0;
-            public static final double magOffsetBR = 0;
+            public static final double magOffsetFL = 0.970;
+            public static final double magOffsetFR = 0.638;
+            public static final double magOffsetBL = 0.142;
+            public static final double magOffsetBR = 0.465;
         }
 
         public static final class Kinematics {
@@ -57,7 +57,7 @@ public final class Constants {
             public static final double kI = 0.0;
             public static final double kD = 0.0;
                     
-            public static final double kT = 0.005;
+            public static final double kT = 0.001;
         }
     }
 
