@@ -6,16 +6,24 @@ import frc.robot.subsystems.Launcher;
 public class Test extends Command {
 
     private final Launcher launcher;
+    private final boolean intake;
 
-    public Test(Launcher launcher) {
+    public Test(Launcher launcher, boolean intake) {
         this.launcher = launcher;
+        this.intake = intake;
+
         addRequirements(launcher);
     }
 
     /** Called once when the command is initially scheduled. */
     @Override
     public void initialize() {
-        launcher.toggleLauncher();
+        if(intake) {
+            launcher.toggleIntake();
+        }
+        else {
+            launcher.toggleLauncher();
+        }
     }
 
     /** Called repeatedly while the command is scheduled. */

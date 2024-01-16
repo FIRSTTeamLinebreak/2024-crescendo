@@ -23,8 +23,8 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final SwerveDrive m_swerveDrive = new SwerveDrive();
-    private final Vision m_vision = new Vision("OV5647");
-    private final Launcher m_launcher = new Launcher(20, 42);
+    private final Vision m_vision = new Vision("Camera_Module_v1");
+    private final Launcher m_launcher = new Launcher(8, 9);
 
     private final PIDController visionPID = new PIDController(0.02, 0, 0);
 
@@ -55,7 +55,8 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         m_swerveDrive.setDefaultCommand(m_SwerveDriveCommand);
-        m_driverController.a().onTrue(new Test(m_launcher));
+        m_driverController.a().onTrue(new Test(m_launcher, false));
+        m_driverController.b().onTrue(new Test(m_launcher, true));
     }
 
     /**
