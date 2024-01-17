@@ -1,34 +1,40 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Launcher;
+import frc.robot.subsystems.LED;
 
-public class Test extends Command {
+public class SetLEDRed extends Command {
 
-    private final Launcher launcher;
-    private final boolean intake;
+    private final LED m_led;
+    private int count = 0;
 
-    public Test(Launcher launcher, boolean intake) {
-        this.launcher = launcher;
-        this.intake = intake;
+    public SetLEDRed(LED m_led) {
+        this.m_led = m_led;
 
-        addRequirements(launcher);
+        addRequirements(m_led);
     }
 
     /** Called once when the command is initially scheduled. */
     @Override
     public void initialize() {
-        // if(intake) {
-        //     launcher.toggleIntake();
-        // }
-        // else {
-        //     launcher.toggleLauncher();
-        // }
+        for (int i = 0; i < m_led.getLength(); i++) {
+            m_led.setLED(i, 255, 0, 0);
+        }
     }
 
     /** Called repeatedly while the command is scheduled. */
     @Override
-    public void execute() {}
+    public void execute() {
+        if (count < m_led.getLength()) {
+            m_led.setLED(count, 255 - (255 / m_led.getLength() * count), (255 / m_led.getLength()) * count, 0);
+            count++;
+        }
+        else {
+            count = 0;
+            m_led.setLED(count, 255, 0, 0);
+        }
+
+    }
 
     /**
      * Called when either the command finishes normally, or when it interrupted/canceled. Do not
@@ -49,4 +55,5 @@ public class Test extends Command {
     public boolean isFinished() {
         return true;
     }
+    
 }
