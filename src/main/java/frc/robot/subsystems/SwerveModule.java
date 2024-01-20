@@ -10,6 +10,8 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
@@ -130,5 +132,10 @@ public class SwerveModule {
         return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1)
                 * 2
                 * Math.PI;
+    }
+    
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(
+            driveController.getPosition().getValueAsDouble(), new Rotation2d(getTurningPosition()));
     }
 }

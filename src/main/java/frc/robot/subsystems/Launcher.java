@@ -33,8 +33,8 @@ public class Launcher extends SubsystemBase {
         
         flyWheelLeader.setIdleMode(IdleMode.kCoast);
         flyWheelFollower.setIdleMode(IdleMode.kCoast);
-        controlWheelLeader.setIdleMode(IdleMode.kCoast);
-        controlWheelFollower.setIdleMode(IdleMode.kCoast);
+        controlWheelLeader.setIdleMode(IdleMode.kBrake);
+        controlWheelFollower.setIdleMode(IdleMode.kBrake);
     }
 
     public void toggleLauncherIntake() {
@@ -73,7 +73,7 @@ public class Launcher extends SubsystemBase {
     public void periodic() {
         flyWheelLeader.set(launcherSpeed);
         flyWheelFollower.set(-launcherSpeed);
-        if (launcherSpeed < 0 && i < 50) {
+        if (launcherSpeed < 0 && i < 13) {
             controlWheelLeader.set(0);
             controlWheelFollower.set(0);
             i++;
