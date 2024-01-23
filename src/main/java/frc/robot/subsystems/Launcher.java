@@ -10,31 +10,33 @@ public class Launcher extends SubsystemBase {
 
     private final CANSparkMax flyWheelLeader;
     private final CANSparkMax flyWheelFollower;
-    private final CANSparkMax controlWheelLeader;
-    private final CANSparkMax controlWheelFollower;
+    private final CANSparkMax controlWheels;
+    private final CANSparkMax launcherRotation;
 
     private double launcherSpeed = 0.0;
     private double launcherSpeedTarget = -1.0;
     private double intakeSpeed = 0.0;
     private double intakeSpeedTarget = 0.3;
     private double controlIntakeSpeedTarget = .05;
+    private double launcherRotationSpeed = 0.0;
+    private double launcherRotationSpeedTarget = 0.0;
     private int i = 0;
 
-    public Launcher(int flyWheelLeaderID, int flyWheelFollowerID, int controlWheelLeaderID, int controlWheelFollowerID) {
+    public Launcher(int flyWheelLeaderID, int flyWheelFollowerID, int controlWheelsID, int launcherRotationID) {
         flyWheelLeader = new CANSparkMax(flyWheelLeaderID, MotorType.kBrushless);
         flyWheelFollower = new CANSparkMax(flyWheelFollowerID, MotorType.kBrushless);
-        controlWheelLeader = new CANSparkMax(controlWheelLeaderID, MotorType.kBrushless);
-        controlWheelFollower = new CANSparkMax(controlWheelFollowerID, MotorType.kBrushless);
+        controlWheels = new CANSparkMax(controlWheelsID, MotorType.kBrushless);
+        launcherRotation = new CANSparkMax(launcherRotationID, MotorType.kBrushless);
 
         flyWheelLeader.restoreFactoryDefaults();
         flyWheelFollower.restoreFactoryDefaults();
-        controlWheelLeader.restoreFactoryDefaults();
-        controlWheelFollower.restoreFactoryDefaults();
+        controlWheels.restoreFactoryDefaults();
+        launcherRotation.restoreFactoryDefaults();
         
         flyWheelLeader.setIdleMode(IdleMode.kCoast);
         flyWheelFollower.setIdleMode(IdleMode.kCoast);
-        controlWheelLeader.setIdleMode(IdleMode.kBrake);
-        controlWheelFollower.setIdleMode(IdleMode.kBrake);
+        controlWheels.setIdleMode(IdleMode.kBrake);
+        launcherRotation.setIdleMode(IdleMode.kBrake);
     }
 
     public void toggleLauncherIntake() {
@@ -59,6 +61,12 @@ public class Launcher extends SubsystemBase {
         }
     }
 
+    // public void toggleLauncherRotation() {
+    //     if(.getPosition() < launcherDegreeTarget) {
+    //         launcherRotationSpeed = launcherRotationSpeedTarget;
+    //     }
+    // }
+
     // public void toggleIntake() {
     //     if (launcherSpeed == 0.0) {
     //         launcherSpeed = intakeSpeedTarget;
@@ -74,13 +82,11 @@ public class Launcher extends SubsystemBase {
         flyWheelLeader.set(launcherSpeed);
         flyWheelFollower.set(-launcherSpeed);
         if (launcherSpeed < 0 && i < 13) {
-            controlWheelLeader.set(0);
-            controlWheelFollower.set(0);
+            controlWheels.set(0);
             i++;
             return;      
         }
-        controlWheelLeader.set(intakeSpeed);
-        controlWheelFollower.set(-intakeSpeed);
+        controlWheels.set(intakeSpeed);
         i = 0;
 
     }
