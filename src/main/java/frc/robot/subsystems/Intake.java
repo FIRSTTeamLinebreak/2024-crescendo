@@ -21,14 +21,14 @@ public class Intake extends SubsystemBase {
         intakeMotor.setIdleMode(IdleMode.kCoast);
     }
 
-    // public void toggleFloorIntake() {
-    //     if (intakeSpeed == 0.0) {
-    //         intakeSpeed = intakeSpeedTarget;
-    //     }
-    //     else {
-    //         intakeSpeed = 0.0;
-    //     }
-    // }
+    public void toggleFloorIntake() {
+        if (intakeSpeed == 0.0) {
+            intakeSpeed = intakeSpeedTarget;
+        }
+        else {
+            intakeSpeed = 0.0;
+        }
+    }
 
 
     // public void holdIntake() {
@@ -42,6 +42,6 @@ public class Intake extends SubsystemBase {
     /** Run approx. every 20 ms. */
     @Override
     public void periodic() {
-        // intakeMotor.set(intakeSpeed);
+        intakeMotor.set(intakeSpeed);
     }
 }

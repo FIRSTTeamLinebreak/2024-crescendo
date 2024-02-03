@@ -1,7 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -51,6 +55,7 @@ public final class Constants {
             public static final SwerveDriveKinematics driveKinematics =
                 new SwerveDriveKinematics(locationFL, locationFR, locationBL, locationBR);
         }
+        
 
         public static final class PIDConstants {
             public static final double kP= 0.7;
@@ -58,6 +63,16 @@ public final class Constants {
             public static final double kD = 0.0;
                     
             public static final double kT = 0.001;
+        }
+
+        public static final class AutoConstants {
+            public static final double tP = 5.0;
+            public static final double tI = 0.0;
+            public static final double tD = 0.0;
+
+            public static final double rP = 5.0;
+            public static final double rI = 0.0;
+            public static final double rD = 0.0;
         }
     }
 

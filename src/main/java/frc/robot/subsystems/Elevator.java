@@ -39,6 +39,6 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         leftMotor.set(elevatorSpeed);
-        rightMotor.set(-elevatorSpeed)
+        rightMotor.set(-elevatorSpeed);
     }
 }
