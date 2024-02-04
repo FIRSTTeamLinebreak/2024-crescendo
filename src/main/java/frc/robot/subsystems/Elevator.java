@@ -16,7 +16,7 @@ public class Elevator extends SubsystemBase {
 
     public Elevator(int leftMotorID, int rightMotorID) {
         leftMotor = new CANSparkMax(leftMotorID, MotorType.kBrushless);
-        rightMotor = new CANSparkMax(rightMotorID, MotorType.kBrushless)
+        rightMotor = new CANSparkMax(rightMotorID, MotorType.kBrushless);
 
         leftMotor.restoreFactoryDefaults();
         rightMotor.restoreFactoryDefaults();

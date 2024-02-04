@@ -24,22 +24,22 @@ public final class Constants {
             public static final double driveGearRatio = 6.12;
 
             public static final double driveRotToMeters =
-                ((2 * Math.PI * wheelDiameter) / driveGearRatio) / 2048;
+                ((2 * Math.PI * wheelDiameter) / driveGearRatio);
             public static final double driveRpsToMps = driveRotToMeters / 10 * 60 * 2;
 
             public static final double drivePhysicalMaxSpeed = 5.486;
 
-            public static final double trackWidth = Units.inchesToMeters(23.5);
-            public static final double wheelBase = Units.inchesToMeters(21.5);
+            public static final double wheelBase = Units.inchesToMeters(23.5);
+            public static final double trackWidth = Units.inchesToMeters(21.5);
 
             // public static final double magOffsetFL = 0.469;
             // public static final double magOffsetFR = 0.126;
             // public static final double magOffsetBL = 0.853;
             // public static final double magOffsetBR = 0.520;
-            public static final double magOffsetFL = 0.970;
-            public static final double magOffsetFR = 0.638;
-            public static final double magOffsetBL = 0.142;
-            public static final double magOffsetBR = 0.465;
+            public static final double magOffsetFL = 0.392;
+            public static final double magOffsetFR = 0.220;
+            public static final double magOffsetBL = 0.715;
+            public static final double magOffsetBR = 0.888;
         }
 
         public static final class Kinematics {
@@ -65,14 +65,22 @@ public final class Constants {
             public static final double kT = 0.001;
         }
 
-        public static final class AutoConstants {
-            public static final double tP = 5.0;
-            public static final double tI = 0.0;
-            public static final double tD = 0.0;
+        public static final class HolonomicPathFollowerConfig {
 
-            public static final double rP = 5.0;
-            public static final double rI = 0.0;
-            public static final double rD = 0.0;
+            public static final class AutoPIDConstants {
+
+                public static final double rP = 0.1;
+                public static final double rI = 0.0;
+                public static final double rD = 0.0;
+                
+                public static final double tP = 0.1;
+                public static final double tI = 0.0;
+                public static final double tD = 0.0;
+
+            }
+
+            public static final double autoDriveMaxModuleSpeed = 5.486;
+
         }
     }
 

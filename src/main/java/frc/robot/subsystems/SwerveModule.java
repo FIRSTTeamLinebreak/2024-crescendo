@@ -29,6 +29,8 @@ public class SwerveModule {
     private final CANcoder canCoder;
     private final double canCoderOffset;
 
+    private SwerveModuleState state;
+
     /**
      * Creates a new swerve module.
      *
@@ -93,25 +95,30 @@ public class SwerveModule {
                     getTurningPosition());
         }
 
-        // Implements a "deadzone" so releasing the joystick won't make the wheels reset to 0
-        if (Math.abs(state.speedMetersPerSecond) <= .01) {
-            stop();
-            return;
-        }
-
         // Optimize movements to not move more than 90 deg for any new state
-        state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
+        this.state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
         driveController.set(
-                state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
+                this.state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
         turningController.set(
                 turningPid.calculate(
-                        getTurningPosition(), state.angle.getRadians() / (2 * Math.PI)));
+                        getTurningPosition(), this.state.angle.getRadians() / (2 * Math.PI)));
+    }
+
+    public SwerveModuleState getState() {
+        if (state != null)
+                return state;
+        return new SwerveModuleState();
     }
 
     /** Stops the swerve module. */
     public void stop() {
         driveController.set(0);
         turningController.set(0);
+    }
+
+    public void reset() {
+        driveController.setPosition(0.0);
+        turningController.getEncoder().setPosition(0.0);
     }
 
     /**
@@ -136,6 +143,6 @@ public class SwerveModule {
     
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            driveController.getPosition().getValueAsDouble(), new Rotation2d(getTurningPosition()));
+            driveController.getPosition().getValueAsDouble() * SwerveConstants.Dimensions.driveRotToMeters, new Rotation2d(getTurningPosition()));
     }
 }
