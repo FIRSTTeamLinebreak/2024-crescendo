@@ -10,10 +10,10 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.Constants.SwerveConstants;
 
 /** An individual swerve module. */
@@ -58,11 +58,11 @@ public class SwerveModule {
 
         turningPid =
                 new PIDController(
-                        SwerveConstants.PIDConstants.kP,
-                        SwerveConstants.PIDConstants.kI,
-                        SwerveConstants.PIDConstants.kD);
+                        SwerveConstants.PID.ModuleAngle.kP,
+                        SwerveConstants.PID.ModuleAngle.kI,
+                        SwerveConstants.PID.ModuleAngle.kD);
         turningPid.enableContinuousInput(0.0, 1.0);
-        turningPid.setTolerance(SwerveConstants.PIDConstants.kT);
+        turningPid.setTolerance(SwerveConstants.PID.ModuleAngle.kT);
 
         canCoder = new CANcoder(coderId);
 
@@ -96,17 +96,18 @@ public class SwerveModule {
         }
 
         // Optimize movements to not move more than 90 deg for any new state
-        this.state = SwerveModuleState.optimize(state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
+        this.state =
+                SwerveModuleState.optimize(
+                        state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
         driveController.set(
-                this.state.speedMetersPerSecond / SwerveConstants.Dimensions.drivePhysicalMaxSpeed);
+                this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed);
         turningController.set(
                 turningPid.calculate(
                         getTurningPosition(), this.state.angle.getRadians() / (2 * Math.PI)));
     }
 
     public SwerveModuleState getState() {
-        if (state != null)
-                return state;
+        if (state != null) return state;
         return new SwerveModuleState();
     }
 
@@ -140,9 +141,11 @@ public class SwerveModule {
                 * 2
                 * Math.PI;
     }
-    
+
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
-            driveController.getPosition().getValueAsDouble() * SwerveConstants.Dimensions.driveRotToMeters, new Rotation2d(getTurningPosition()));
+                driveController.getPosition().getValueAsDouble()
+                        * SwerveConstants.Kinematics.driveRotToMeters,
+                new Rotation2d(getTurningPosition()));
     }
 }

@@ -6,6 +6,9 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/* May need to change to a PID system for launcherRotation
+ *
+ * Might be best the change the way that the delay works currently */
 public class Launcher extends SubsystemBase {
 
     private final CANSparkMax flyWheelLeader;
@@ -18,8 +21,6 @@ public class Launcher extends SubsystemBase {
     private double intakeSpeed = 0.0;
     private double intakeSpeedTarget = 0.3;
     private double controlIntakeSpeedTarget = .05;
-    private double launcherRotationSpeed = 0.0;
-    private double launcherRotationSpeedTarget = 0.0;
     private int i = 0;
 
     public Launcher(int flyWheelLeaderID, int flyWheelFollowerID, int controlWheelsID, int launcherRotationID) {
@@ -88,6 +89,5 @@ public class Launcher extends SubsystemBase {
         }
         controlWheels.set(intakeSpeed);
         i = 0;
-
     }
 }

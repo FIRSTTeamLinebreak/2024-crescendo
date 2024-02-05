@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+
 import frc.robot.subsystems.LED;
 
 public class SetLEDRed extends Command {
@@ -10,7 +11,6 @@ public class SetLEDRed extends Command {
 
     public SetLEDRed(LED m_led) {
         this.m_led = m_led;
-
         addRequirements(m_led);
     }
 
@@ -26,14 +26,16 @@ public class SetLEDRed extends Command {
     @Override
     public void execute() {
         if (count < m_led.getLength()) {
-            m_led.setLED(count, 255 - ((255 / m_led.getLength()) * count), (255 / m_led.getLength()) * count, 0);
+            m_led.setLED(
+                    count,
+                    255 - ((255 / m_led.getLength()) * count),
+                    (255 / m_led.getLength()) * count,
+                    0);
             count++;
-        }
-        else {
+        } else {
             count = 0;
             m_led.setLED(count, 255, 0, 0);
         }
-
     }
 
     /**
@@ -53,7 +55,6 @@ public class SetLEDRed extends Command {
      */
     @Override
     public boolean isFinished() {
-        return true;
+        return false;
     }
-    
 }

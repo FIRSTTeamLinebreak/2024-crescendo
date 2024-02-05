@@ -15,9 +15,7 @@ public class Intake extends SubsystemBase {
 
     public Intake(int intakeMotorID) {
         intakeMotor = new CANSparkMax(intakeMotorID, MotorType.kBrushless);
-
         intakeMotor.restoreFactoryDefaults();
-        
         intakeMotor.setIdleMode(IdleMode.kCoast);
     }
 
@@ -29,15 +27,6 @@ public class Intake extends SubsystemBase {
             intakeSpeed = 0.0;
         }
     }
-
-
-    // public void holdIntake() {
-    //     intakeSpeed = intakeSpeedTarget;
-    // }
-
-    // public void releaseIntake() {
-    //     intakeSpeed = 0;
-    // }
 
     /** Run approx. every 20 ms. */
     @Override

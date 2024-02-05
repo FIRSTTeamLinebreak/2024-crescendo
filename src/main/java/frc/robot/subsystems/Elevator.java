@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/* Will need to be convirted to a PID system */
 public class Elevator extends SubsystemBase {
 
     private final CANSparkMax leftMotor;
@@ -33,7 +34,6 @@ public class Elevator extends SubsystemBase {
             elevatorSpeed = 0.0;
         }
     }
-
 
     /** Run approx. every 20 ms. */
     @Override
