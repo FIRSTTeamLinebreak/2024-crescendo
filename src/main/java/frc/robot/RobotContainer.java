@@ -3,8 +3,6 @@ package frc.robot;
 import static frc.robot.Util.applyLinearDeadZone;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -15,8 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.JoystickConstants;
 import frc.robot.commands.JoystickDriveCommand;
-import frc.robot.commands.SetLEDRed;
-import frc.robot.subsystems.LED;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
 import frc.robot.subsystems.SwerveDrive;
 import frc.robot.subsystems.Vision;
@@ -34,7 +31,7 @@ public class RobotContainer {
     // private final LED m_led = new LED(0, 10);
     private final Launcher m_launcher;
     // private final Intake m_intake = new Intake(5);
-    // private final Elevator m_elevator = new Elevator(6, 7);
+    private final Elevator m_elevator;
 
     private final PIDController visionPID;
     private final SendableChooser<Command> autoChooser;
@@ -47,6 +44,7 @@ public class RobotContainer {
         m_swerveDrive = new SwerveDrive();
         m_vision = new Vision();
         m_launcher = new Launcher(12, 13, 11, 14);
+        m_elevator = new Elevator(6, 7);
 
         visionPID = new PIDController(0.02, 0, 0);
 
