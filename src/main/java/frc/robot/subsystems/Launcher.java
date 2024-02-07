@@ -37,7 +37,7 @@ public class Launcher extends SubsystemBase {
         flyWheelLeader.setIdleMode(IdleMode.kCoast);
         flyWheelFollower.setIdleMode(IdleMode.kCoast);
         controlWheels.setIdleMode(IdleMode.kBrake);
-        launcherRotation.setIdleMode(IdleMode.kBrake);
+        // launcherRotation.setIdleMode(IdleMode.kBrake);
     }
 
     public void toggleLauncherIntake() {

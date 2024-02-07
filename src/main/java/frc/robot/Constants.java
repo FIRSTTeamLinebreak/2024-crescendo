@@ -29,10 +29,10 @@ public final class Constants {
             public static final double wheelBase = Units.inchesToMeters(23.5);
             public static final double trackWidth = Units.inchesToMeters(21.5);
 
-            public static final double magOffsetFL = 0.392;
-            public static final double magOffsetFR = 0.220;
-            public static final double magOffsetBL = 0.715;
-            public static final double magOffsetBR = 0.888;
+            public static final double magOffsetFL = 0.142;
+            public static final double magOffsetFR = 0.970;
+            public static final double magOffsetBL = 0.465;
+            public static final double magOffsetBR = 0.638;
         }
 
         public static final class Kinematics {

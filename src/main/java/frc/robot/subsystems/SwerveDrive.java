@@ -27,19 +27,19 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveModule backRight;
 
     private final AHRS gyro;
-    private final double gyroOffset = 0.0;
+    private final double gyroOffset = 90.0;
 
     private final SwerveDriveOdometry driveOdometry;
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
-        frontRight =
-                new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
         frontLeft =
+                new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
+        frontRight =
                 new SwerveModule(31, false, 32, false, 33, SwerveConstants.Dimensions.magOffsetFR);
-        backRight =
-                new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
         backLeft =
+                new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
+        backRight =
                 new SwerveModule(51, false, 52, false, 53, SwerveConstants.Dimensions.magOffsetBR);
 
         frontRight.reset();
@@ -58,7 +58,7 @@ public class SwerveDrive extends SubsystemBase {
                             frontLeft.getPosition(),
                             frontRight.getPosition(),
                             backLeft.getPosition(),
-                            backLeft.getPosition()
+                            backRight.getPosition()
                         },
                         new Pose2d(0.0, 0.0, new Rotation2d()));
 
