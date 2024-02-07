@@ -32,7 +32,7 @@ public class RobotContainer {
     private final SwerveDrive m_swerveDrive;
     private final Vision m_vision;
     // private final LED m_led = new LED(0, 10);
-    // private final Launcher m_launcher = new Launcher(1, 2, 3, 4);
+    private final Launcher m_launcher;
     // private final Intake m_intake = new Intake(5);
     // private final Elevator m_elevator = new Elevator(6, 7);
 
@@ -45,7 +45,8 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         m_swerveDrive = new SwerveDrive();
-        m_vision = new Vision("Camera_Module_v1");
+        m_vision = new Vision();
+        m_launcher = new Launcher(12, 13, 11, 14);
 
         visionPID = new PIDController(0.02, 0, 0);
 
@@ -98,10 +99,10 @@ public class RobotContainer {
 
   public void initTeleop() {
         m_swerveDrive.setDefaultCommand(m_SwerveDriveCommand);
-        // m_driverController.a().onTrue(new InstantCommand(m_launcher::toggleLauncherIntake, m_launcher));
+        m_driverController.a().onTrue(new InstantCommand(m_launcher::toggleLauncherIntake, m_launcher));
+        m_driverController.b().onTrue(new InstantCommand(m_launcher::toggleLauncherOutake, m_launcher));
         // m_driverController.a().whileTrue(new InstantCommand(m_intake::holdIntake(), m_intake));
         // m_driverController.a().onFalse(new InstantCommand(m_intake::releaseIntake(), m_intake));
-        // m_driverController.b().onTrue(new InstantCommand(m_launcher::toggleLauncherOutake, m_launcher));
   }
 
 }
