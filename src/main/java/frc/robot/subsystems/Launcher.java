@@ -26,6 +26,9 @@ public class Launcher extends SubsystemBase {
     private double controlSpeed = 0.0;
     private double rotationSetpoint = 0.0;
 
+    private double upperLimit = 0.0;
+    private double lowerLimit = 0.0;
+
     public Launcher(
             int flyWheelLeaderID,
             int flyWheelFollowerID,
@@ -80,6 +83,15 @@ public class Launcher extends SubsystemBase {
         controlWheels.set(controlSpeed);
 
         if (rotationPIDEnabled) {
+            if (rotationSetpoint > upperLimit) {
+                rotationSetpoint = upperLimit;
+                launcherRotation.set(0.0);
+                return;
+            } else if (rotationSetpoint < lowerLimit) {
+                rotationSetpoint = lowerLimit;
+                launcherRotation.set(0.0);
+                return;
+            }
             launcherRotation.set(rotationPID.calculate(rotationEncoder.get(), rotationSetpoint));
         } else {
             launcherRotation.set(0.0);
