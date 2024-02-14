@@ -5,17 +5,20 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Constants.SwerveConstants.PID;
 
-/* Will need to be convirted to a PID system */
 public class Elevator extends PIDSubsystem {
 
     private final CANSparkMax leftMotor;
     private final CANSparkMax rightMotor;
 
-    private final double upperLimit = 0.0;
+    private final double upperLimit = 100.0;
     private final double lowerLimit = 0.0;
+
+    // For Testing
+    private double speed = 0.0;
 
     public Elevator(int leftMotorID, int rightMotorID) {
         super(new PIDController(PID.Elevator.kP, PID.Elevator.kI, PID.Elevator.kD));
@@ -29,29 +32,41 @@ public class Elevator extends PIDSubsystem {
         
         leftMotor.setIdleMode(IdleMode.kBrake);
         rightMotor.setIdleMode(IdleMode.kBrake);
+
+        this.setSetpoint(getMeasurement());
     }
 
-    public void useOutput(double output, double setpoint) {
+    public void setPoint(double setpoint) {
         if (setpoint > upperLimit) {
             setpoint = upperLimit;
-            this.setSetpoint(upperLimit);
-            leftMotor.set(0.0);
-            rightMotor.set(0.0);
-            return;
         } else if (setpoint < lowerLimit) {
             setpoint = lowerLimit;
-            this.setSetpoint(lowerLimit);
-            leftMotor.set(0.0);
-            rightMotor.set(0.0);
-            return;
         }
-        leftMotor.set(output);
-        rightMotor.set(-output);
+        this.setSetpoint(setpoint);
+    }
+
+    public boolean atSetpoint() {
+        double measurement = getMeasurement();
+        double tolerance = this.getController().getPositionTolerance();
+        double setpoint = this.getSetpoint();
+
+        SmartDashboard.putNumber("Ele setpoint", setpoint);
+        SmartDashboard.putNumber("Ele Measurement", measurement);
+        SmartDashboard.putNumber("Ele tolerance", tolerance);
+        SmartDashboard.putBoolean("Ele atSetpoint", this.getController().atSetpoint());
+
+        return this.getController().atSetpoint();
+    }
+
+    @Override
+    public void useOutput(double output, double setpoint) {
+        leftMotor.set(-output);
+        rightMotor.set(output);
     }
 
     @Override
     public double getMeasurement() {
-        return leftMotor.getEncoder().getPosition();
+        return leftMotor.getEncoder().getPosition() * -1;
     }
 
     /** Run approx. every 20 ms. */

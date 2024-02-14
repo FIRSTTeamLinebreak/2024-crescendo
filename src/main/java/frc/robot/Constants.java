@@ -65,6 +65,14 @@ public final class Constants {
                 public static final double kT = 0.001;
             }
 
+            public static final class ClawRotation {
+                public static final double kP = 0.85;
+                public static final double kI = 0.0;
+                public static final double kD = 0.0;
+
+                public static final double kT = 0.005;
+            }
+
             public static final class AutoTranslation {
                 public static final double kP = 0.1;
                 public static final double kI = 0.0;
@@ -86,7 +94,7 @@ public final class Constants {
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
 
-                public static final double kT = 0.0;
+                public static final double kT = 0.1;
             }
         }
 

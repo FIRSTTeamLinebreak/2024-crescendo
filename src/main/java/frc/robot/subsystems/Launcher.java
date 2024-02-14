@@ -6,7 +6,9 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.SwerveConstants.PID;
 
 /* May need to change to a PID system for launcherRotation
  *
@@ -24,9 +26,9 @@ public class Launcher extends SubsystemBase {
 
     private double launcherSpeed = 0.0;
     private double controlSpeed = 0.0;
-    private double rotationSetpoint = 0.0;
+    private double rotationSetpoint;
 
-    private double upperLimit = 0.0;
+    private double upperLimit = 1.0;
     private double lowerLimit = 0.0;
 
     public Launcher(
@@ -49,10 +51,11 @@ public class Launcher extends SubsystemBase {
         controlWheels.setIdleMode(IdleMode.kBrake);
         launcherRotation.setIdleMode(IdleMode.kBrake);
 
-        rotationEncoder = new DutyCycleEncoder(9);
+        rotationEncoder = new DutyCycleEncoder(0);
+        rotationSetpoint = getMeasurement();
 
-        rotationPID = new PIDController(0.1, 0.0, 0.0);
-        rotationPID.setTolerance(0.1);
+        rotationPID = new PIDController(PID.ClawRotation.kP, PID.ClawRotation.kI, PID.ClawRotation.kD);
+        rotationPID.setTolerance(PID.ClawRotation.kT);
     }
 
     public void setLauncherSpeed(double speed) {
@@ -63,8 +66,28 @@ public class Launcher extends SubsystemBase {
         controlSpeed = speed;
     }
 
+    public double getMeasurement() {
+        // .56 to .88 1.4 rotations
+        // -0.44 to 0.88
+        SmartDashboard.putNumber("ABS POS", rotationEncoder.getAbsolutePosition());
+        SmartDashboard.putNumber("REL POS", rotationEncoder.get());
+        double measurement = rotationEncoder.get();
+        return (measurement + 0.83) / 1.3;
+    }
+
     public void setRotationSetpoint(double setpoint) {
+        if (setpoint > upperLimit) {
+                rotationSetpoint = upperLimit;
+                return;
+            } else if (setpoint < lowerLimit) {
+                rotationSetpoint = lowerLimit;
+                return;
+            }
         rotationSetpoint = setpoint;
+    }
+
+    public boolean rotationAtSetpoint() {
+        return rotationPID.atSetpoint();
     }
 
     public void enableRotationPID() {
@@ -82,17 +105,11 @@ public class Launcher extends SubsystemBase {
         flyWheelFollower.set(-launcherSpeed);
         controlWheels.set(controlSpeed);
 
+        SmartDashboard.putNumber("Claw Rotation", getMeasurement());
+
         if (rotationPIDEnabled) {
-            if (rotationSetpoint > upperLimit) {
-                rotationSetpoint = upperLimit;
-                launcherRotation.set(0.0);
-                return;
-            } else if (rotationSetpoint < lowerLimit) {
-                rotationSetpoint = lowerLimit;
-                launcherRotation.set(0.0);
-                return;
-            }
-            launcherRotation.set(rotationPID.calculate(rotationEncoder.get(), rotationSetpoint));
+            double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
+            launcherRotation.set(calculatedSpeed);
         } else {
             launcherRotation.set(0.0);
         }
