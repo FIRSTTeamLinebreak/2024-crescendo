@@ -4,6 +4,7 @@ import static frc.robot.Util.applyLinearDeadZone;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -40,7 +41,7 @@ public class RobotContainer {
     private final Intake m_intake;
 
     private final PIDController visionPID;
-    private final SendableChooser<Command> autoChooser;
+    // private final SendableChooser<Command> autoChooser;
 
     private final CommandXboxController m_driveController;
     private final CommandXboxController m_scoreController;
@@ -63,7 +64,7 @@ public class RobotContainer {
         m_driveController = new CommandXboxController(JoystickConstants.driveControllerId);
         m_scoreController = new CommandXboxController(JoystickConstants.scoreControllerId);
         m_SwerveDriveCommand = new JoystickDriveCommand(m_swerveDrive,
-                () -> m_driveController.getLeftX(), () -> m_driveController.getLeftY() * -1, () -> {
+                () -> m_driveController.getLeftX() * -1, () -> m_driveController.getLeftY(), () -> {
                     // Rotation
                     double angle = m_vision.getTargetAngle();
                     if (m_driveController.getHID().getAButton() && m_vision.hasTargets()) {
@@ -71,21 +72,26 @@ public class RobotContainer {
                     }
 
                     return applyLinearDeadZone(
-                            JoystickConstants.joystickDeadZone, m_driveController.getRightX())
-                            / (m_driveController.getHID().getLeftBumper()
-                                    ? JoystickConstants.slowTurningDivisor
-                                    : 1);
+                            JoystickConstants.joystickDeadZone, m_driveController.getRightX());
                 }, () -> !m_driveController.getHID().getRightBumper());
         new SetLEDRed(m_led).schedule();
 
+        // PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+        //     // Do whatever you want with the pose here
+        //     SmartDashboard.putString("PP Cur Pos", pose.toString());
+        // });
+
+        // // Logging callback for target robot pose
+        // PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+        //     // Do whatever you want with the pose here
+        //     SmartDashboard.putString("PP Tgt Pos", pose.toString());
+        // });
+
         // Build an auto chooser. This will use Commands.none() as the default option.
-        autoChooser = AutoBuilder.buildAutoChooser("FirstAuto");
+        // autoChooser = AutoBuilder.buildAutoChooser("FirstAuto");
 
-        // Another option that allows you to specify the default auto by its name
-        // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
-
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        System.out.println(SmartDashboard.getData("Auto Chooser"));
+        // SmartDashboard.putData("Auto Chooser", autoChooser);
+        // System.out.println(SmartDashboard.getData("Auto Chooser"));
     }
 
     /**
@@ -140,16 +146,16 @@ public class RobotContainer {
         Command elevatorCommand = new InstantCommand(() -> {
             double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getLeftY())*1.5;
             if (joystickValue != 0.0) {
-                m_elevator.setPoint(m_elevator.getMeasurement() + joystickValue);
+                m_elevator.setPoint(m_elevator.getMeasurement() - joystickValue);
             }
         }).repeatedly();
         elevatorCommand.addRequirements(m_elevator);
         m_elevator.setDefaultCommand(elevatorCommand);
 
         Command launcherCommand = new InstantCommand(() -> {
-            double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getRightY())*0.1;
+            double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getRightY())*0.2;
             if (joystickValue != 0.0) {
-                m_launcher.setRotationSetpoint(m_launcher.getMeasurement() + joystickValue);
+                m_launcher.setRotationSetpoint(m_launcher.getMeasurement() - joystickValue);
             }
         }).repeatedly();
         launcherCommand.addRequirements(m_launcher);

@@ -1,18 +1,12 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.pathplanner.lib.auto.AutoBuilder;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.JoystickConstants;
@@ -27,9 +21,7 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveModule backRight;
 
     private final AHRS gyro;
-    private final double gyroOffset = 90.0;
-
-    private final SwerveDriveOdometry driveOdometry;
+    private final double gyroOffset = 270.0;
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
@@ -49,40 +41,6 @@ public class SwerveDrive extends SubsystemBase {
 
         gyro = new AHRS(SerialPort.Port.kMXP);
         this.InitGyro();
-
-        driveOdometry =
-                new SwerveDriveOdometry(
-                        Kinematics.driveKinematics,
-                        gyro.getRotation2d(),
-                        new SwerveModulePosition[] {
-                            frontLeft.getPosition(),
-                            frontRight.getPosition(),
-                            backLeft.getPosition(),
-                            backRight.getPosition()
-                        },
-                        new Pose2d(0.0, 0.0, new Rotation2d()));
-
-        AutoBuilder.configureHolonomic(
-                driveOdometry::getPoseMeters, // Needs to be updated to pose estimation
-                (Pose2d pose) ->
-                        driveOdometry.resetPosition(
-                                gyro.getRotation2d(),
-                                new SwerveModulePosition[] {
-                                    frontLeft.getPosition(), frontRight.getPosition(),
-                                    backLeft.getPosition(), backRight.getPosition()
-                                },
-                                pose),
-                this::getRobotRelativeSpeeds,
-                this::setSpeed,
-                SwerveConstants.HolonomicConfig,
-                () -> {
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this);
     }
 
     /**
@@ -91,7 +49,7 @@ public class SwerveDrive extends SubsystemBase {
      * @return Robot heading in Rotation2d
      */
     public Rotation2d getRotation2d() {
-        return Rotation2d.fromDegrees(360 - gyro.getYaw() - gyroOffset);
+        return gyro.getRotation2d();
     }
 
     /** Stops all motors. */
@@ -100,6 +58,15 @@ public class SwerveDrive extends SubsystemBase {
         frontRight.stop();
         backLeft.stop();
         backRight.stop();
+    }
+
+    public SwerveModulePosition[] getModulePositions() {
+        return new SwerveModulePosition[] {
+            frontLeft.getPosition(),
+            frontRight.getPosition(),
+            backLeft.getPosition(),
+            backRight.getPosition()
+        };
     }
 
     public void setDirection(
@@ -118,28 +85,14 @@ public class SwerveDrive extends SubsystemBase {
         }
     }
 
-    private void setSpeed(ChassisSpeeds speeds) {
+    public void setSpeed(ChassisSpeeds speeds) {
         SwerveModuleState[] moduleStates = Kinematics.driveKinematics.toSwerveModuleStates(speeds);
         this.setStates(moduleStates, true);
     }
 
     /** Run approx. every 20 ms. */
     @Override
-    public void periodic() {
-        // Get the rotation of the robot from the gyro.
-        var gyroAngle = gyro.getRotation2d();
-
-        // Update the pose
-        driveOdometry.update(
-                gyroAngle,
-                new SwerveModulePosition[] {
-                    frontLeft.getPosition(), frontRight.getPosition(),
-                    backLeft.getPosition(), backRight.getPosition()
-                });
-
-        Pose2d pose = driveOdometry.getPoseMeters();
-        SmartDashboard.putString("Pose", "x: " + pose.getX() + ", y: " + pose.getY());
-    }
+    public void periodic() {}
 
     /**
      * Sets the swerve modules to a new state.
@@ -158,7 +111,7 @@ public class SwerveDrive extends SubsystemBase {
         backRight.setState(desiredStates[3], log);
     }
 
-    private ChassisSpeeds getRobotRelativeSpeeds() {
+    public ChassisSpeeds getRobotRelativeSpeeds() {
         return Kinematics.driveKinematics.toChassisSpeeds(
                 new SwerveModuleState[] {
                     frontLeft.getState(), frontRight.getState(),
@@ -172,6 +125,7 @@ public class SwerveDrive extends SubsystemBase {
                             try {
                                 Thread.sleep(1000);
                                 gyro.reset();
+                                gyro.setAngleAdjustment(gyroOffset);
                             } catch (Exception e) {
                                 System.out.println("Init failure!");
                                 System.out.println(e);

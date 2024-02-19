@@ -23,7 +23,7 @@ public final class Constants {
     public static final class SwerveConstants {
         /** Dimensions for the Swerve Modules */
         public static final class Dimensions {
-            public static final double wheelDiameter = Units.inchesToMeters(2);
+            public static final double wheelDiameter = Units.inchesToMeters(4.0);
             public static final double wheelCircumference = wheelDiameter * PI;
 
             public static final double wheelBase = Units.inchesToMeters(23.5);
@@ -74,7 +74,7 @@ public final class Constants {
             }
 
             public static final class AutoTranslation {
-                public static final double kP = 0.1;
+                public static final double kP = 5.0;
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
 
@@ -82,7 +82,7 @@ public final class Constants {
             }
 
             public static final class AutoRotation {
-                public static final double kP = 0.1;
+                public static final double kP = 5.0;
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
 
@@ -110,8 +110,8 @@ public final class Constants {
                             PID.AutoRotation.kD),
                     Kinematics.drivePhysicalMaxSpeed,
                     Math.sqrt(
-                            Math.pow(Dimensions.wheelBase, 2)
-                                    + Math.pow(Dimensions.trackWidth, 2)),
+                        Math.pow(Dimensions.wheelBase/2, 2)
+                        + Math.pow(Dimensions.trackWidth/2, 2)),
                     new ReplanningConfig());
     }
 

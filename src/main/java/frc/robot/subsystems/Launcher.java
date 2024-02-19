@@ -24,6 +24,8 @@ public class Launcher extends SubsystemBase {
     private final DutyCycleEncoder rotationEncoder;
     private boolean rotationPIDEnabled = false;
 
+    private final double encoderOffest = 0.4;
+
     private double launcherSpeed = 0.0;
     private double controlSpeed = 0.0;
     private double rotationSetpoint;
@@ -69,10 +71,8 @@ public class Launcher extends SubsystemBase {
     public double getMeasurement() {
         // .56 to .88 1.4 rotations
         // -0.44 to 0.88
-        SmartDashboard.putNumber("ABS POS", rotationEncoder.getAbsolutePosition());
-        SmartDashboard.putNumber("REL POS", rotationEncoder.get());
         double measurement = rotationEncoder.get();
-        return (measurement + 0.83) / 1.3;
+        return 1 - (measurement - encoderOffest) * 2;
     }
 
     public void setRotationSetpoint(double setpoint) {
