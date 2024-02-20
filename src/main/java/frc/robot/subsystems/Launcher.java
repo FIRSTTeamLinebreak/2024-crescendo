@@ -31,7 +31,7 @@ public class Launcher extends SubsystemBase {
     private double rotationSetpoint;
 
     private double upperLimit = 1.0;
-    private double lowerLimit = 0.0;
+    private double lowerLimit = 0.042;
 
     public Launcher(
             int flyWheelLeaderID,
@@ -52,6 +52,11 @@ public class Launcher extends SubsystemBase {
         flyWheelFollower.setIdleMode(IdleMode.kCoast);
         controlWheels.setIdleMode(IdleMode.kBrake);
         launcherRotation.setIdleMode(IdleMode.kBrake);
+
+        flyWheelLeader.setSmartCurrentLimit(20);
+        flyWheelFollower.setSmartCurrentLimit(20);
+        controlWheels.setSmartCurrentLimit(30);
+        launcherRotation.setSmartCurrentLimit(40);
 
         rotationEncoder = new DutyCycleEncoder(0);
         rotationSetpoint = getMeasurement();
@@ -106,6 +111,7 @@ public class Launcher extends SubsystemBase {
         controlWheels.set(controlSpeed);
 
         SmartDashboard.putNumber("Claw Rotation", getMeasurement());
+        SmartDashboard.putNumber("Claw Setpoint", rotationSetpoint);
 
         if (rotationPIDEnabled) {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
