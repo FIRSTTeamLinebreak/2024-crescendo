@@ -6,6 +6,8 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.robot.Constants.SwerveConstants.PID;
 
@@ -56,6 +58,10 @@ public class Elevator extends PIDSubsystem {
         SmartDashboard.putBoolean("Ele atSetpoint", this.getController().atSetpoint());
 
         return this.getController().atSetpoint();
+    }
+
+    public Command moveToSetpoint(double setpoint) {
+        return new InstantCommand(() -> this.setPoint(setpoint)).repeatedly().until(this::atSetpoint);
     }
 
     @Override

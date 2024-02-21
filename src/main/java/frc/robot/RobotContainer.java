@@ -109,6 +109,10 @@ public class RobotContainer {
 
     public void initTeleop() {
         m_swerveDrive.setDefaultCommand(m_SwerveDriveCommand);
+
+        m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
+        m_elevator.setPoint(m_elevator.getMeasurement());
+
         // m_scoreController.a().onTrue(new InstantCommand(() -> {
         //     m_launcher.setLauncherSpeed(0.3);
         //     m_launcher.setControlSpeed(0.1);
@@ -132,21 +136,25 @@ public class RobotContainer {
         //     m_launcher.setLauncherSpeed(0.0);
         //     m_launcher.setControlSpeed(0.0);
         // }));
-        m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
-        m_elevator.setPoint(m_elevator.getMeasurement());
-        Command ele501 = new InstantCommand(() -> m_elevator.setPoint(50)).repeatedly().until(m_elevator::atSetpoint);
-        Command ele502 = new InstantCommand(() -> m_elevator.setPoint(50)).repeatedly().until(m_elevator::atSetpoint);
-        Command ele503 = new InstantCommand(() -> m_elevator.setPoint(50)).repeatedly().until(m_elevator::atSetpoint);
-        Command clawIntake = new InstantCommand(() -> m_launcher.setRotationSetpoint(0.042)).repeatedly().until(m_launcher::rotationAtSetpoint);
-        Command eleIntake = new InstantCommand(() -> m_elevator.setPoint(37)).repeatedly().until(m_elevator::atSetpoint);
-        Command claw50 = new InstantCommand(() -> m_launcher.setRotationSetpoint(.5)).repeatedly().until(m_launcher::rotationAtSetpoint);
-        Command clawAmp = new InstantCommand(() -> m_launcher.setRotationSetpoint(.27)).repeatedly().until(m_launcher::rotationAtSetpoint);
-        Command ele100 = new InstantCommand(() -> m_elevator.setPoint(100)).repeatedly().until(m_elevator::atSetpoint);
-        Command claw100 = new InstantCommand(() -> m_launcher.setRotationSetpoint(1.0)).repeatedly().until(m_launcher::rotationAtSetpoint);
-        Command ele10 = new InstantCommand(() -> m_elevator.setPoint(10)).repeatedly().until(m_elevator::atSetpoint);
-        m_scoreController.a().onTrue(ele501.andThen(clawIntake.alongWith(eleIntake)));
-        m_scoreController.b().onTrue((claw50.alongWith(ele502)).andThen(ele100.alongWith(clawAmp)));
-        m_scoreController.y().onTrue(ele503.andThen(claw100.alongWith(ele10)));
+
+        // Intake Command
+        m_scoreController.a().onTrue(
+            m_elevator.moveToSetpoint(50)
+            .andThen(m_launcher.moveClawToSetpoint(0.042))
+            .andThen(m_elevator.moveToSetpoint(37)));
+
+        // Amp Command
+        m_scoreController.b().onTrue(
+            m_launcher.moveClawToSetpoint(50)
+            .alongWith(m_elevator.moveToSetpoint(50))
+            .andThen(m_elevator.moveToSetpoint(100)
+            .alongWith(m_launcher.moveClawToSetpoint(0.27))));
+
+        // Stow Command
+        m_scoreController.y().onTrue(
+            m_elevator.moveToSetpoint(50)
+            .andThen(m_launcher.moveClawToSetpoint(1.0)
+            .alongWith(m_elevator.moveToSetpoint(10))));
 
         m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
         m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
