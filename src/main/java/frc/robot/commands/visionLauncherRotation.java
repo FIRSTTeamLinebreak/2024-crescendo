@@ -1,37 +1,35 @@
 package frc.robot.commands;
 
-import static frc.robot.Util.applyCircularDeadZone;
-import static frc.robot.Util.applyLinearDeadZone;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.JoystickConstants;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
+import frc.robot.subsystems.Vision;
+public class visionLauncherRotation extends Command {
 
-public class MoveLauncherRotation extends Command {
-
-    private final double setpoint;
+    private final double minLauncherSetpoint = .77;
+    private final double maxLauncherSetpoint = .88;
     private final Launcher m_launcher;
+    private final Vision m_vision;
+    private double setpoint;
 
-    public MoveLauncherRotation(Launcher m_launcher, double setpoint) {
-        this.setpoint = setpoint;
-        this.m_launcher = m_launcher;
+    public visionLauncherRotation(Launcher m_launcher, Vision m_vision) {
+        this.m_launcher = m_launcher;        
+        this.m_vision = m_vision;
 
         addRequirements(m_launcher);
+        addRequirements(m_vision);
     }
-
-    
 
     /** Called once when the command is initially scheduled. */
     @Override
-    public void initialize() {
-        m_launcher.setRotationSetpoint(setpoint);
-    }
+    public void initialize() {}
 
     /** Called repeatedly while the command is scheduled. */
     @Override
-    public void execute() {}
+    public void execute() {
+        double slope = (maxLauncherSetpoint - minLauncherSetpoint) / 1.6;
+        setpoint = (m_vision.getLengthToBase() * slope) + minLauncherSetpoint;
+        m_launcher.setRotationSetpoint(setpoint);
+    }
 
     /**
      * Called when either the command finishes normally, or when it interrupted/canceled. Do not
@@ -50,6 +48,6 @@ public class MoveLauncherRotation extends Command {
      */
     @Override
     public boolean isFinished() {
-        return m_launcher.rotationAtSetpoint();
+        return false;
     }
 }

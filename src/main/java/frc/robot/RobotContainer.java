@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.JoystickConstants;
 import frc.robot.commands.JoystickDriveCommand;
 import frc.robot.commands.SetLEDRed;
+import frc.robot.commands.visionLauncherRotation;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
@@ -113,48 +114,58 @@ public class RobotContainer {
         m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
         m_elevator.setPoint(m_elevator.getMeasurement());
 
-        // m_scoreController.a().onTrue(new InstantCommand(() -> {
-        //     m_launcher.setLauncherSpeed(0.3);
-        //     m_launcher.setControlSpeed(0.1);
-        //     m_intake.setSpeed(0.3);
-        // }));
-        // m_scoreController.a().onFalse(new InstantCommand(() -> {
-        //     m_launcher.setLauncherSpeed(0.0);
-        //     m_launcher.setControlSpeed(0.05);
-        //     m_intake.setSpeed(0.0);
-        // }));
-        // m_scoreController.b().onTrue(
-        //     new InstantCommand(() -> {
-        //         m_launcher.setLauncherSpeed(-1.0);
-        //     })
-        //         .repeatedly()
-        //         .withTimeout(0.25)
-        //         .andThen(new InstantCommand(() -> {
-        //             m_launcher.setControlSpeed(-1.0);
-        //         })));
-        // m_scoreController.b().onFalse(new InstantCommand(() -> {
-        //     m_launcher.setLauncherSpeed(0.0);
-        //     m_launcher.setControlSpeed(0.0);
-        // }));
+        m_scoreController.a().onTrue(new InstantCommand(() -> {
+            m_launcher.setLauncherSpeed(0.3);
+            m_launcher.setControlSpeed(0.1);
+            m_intake.setSpeed(0.3);
+        }));
+        m_scoreController.a().onFalse(new InstantCommand(() -> {
+            m_launcher.setLauncherSpeed(0.0);
+            m_launcher.setControlSpeed(0.05);
+            m_intake.setSpeed(0.0);
+        }));
+        m_scoreController.b().onTrue(
+            new InstantCommand(() -> {
+                m_launcher.setLauncherSpeed(-1.0);
+            })
+                .repeatedly()
+                .withTimeout(0.25)
+                .andThen(new InstantCommand(() -> {
+                    m_launcher.setControlSpeed(-1.0);
+                })));
+        m_scoreController.b().onFalse(new InstantCommand(() -> {
+            m_launcher.setLauncherSpeed(0.0);
+            m_launcher.setControlSpeed(0.0);
+        }));
+
+        Command stow = m_elevator.moveToSetpoint(50)
+            .andThen(m_launcher.moveClawToSetpoint(1.0)
+            .alongWith(m_elevator.moveToSetpoint(10)));
 
         // Intake Command
-        m_scoreController.a().onTrue(
+        m_scoreController.leftTrigger().onTrue(
             m_elevator.moveToSetpoint(50)
             .andThen(m_launcher.moveClawToSetpoint(0.042))
             .andThen(m_elevator.moveToSetpoint(37)));
+        m_scoreController.leftTrigger().onFalse(m_elevator.moveToSetpoint(50)
+            .alongWith(m_launcher.moveClawToSetpoint(0.5))
+            .andThen(m_launcher.moveClawToSetpoint(1.0)
+            .alongWith(m_elevator.moveToSetpoint(5.0))));
 
         // Amp Command
-        m_scoreController.b().onTrue(
-            m_launcher.moveClawToSetpoint(50)
-            .alongWith(m_elevator.moveToSetpoint(50))
-            .andThen(m_elevator.moveToSetpoint(100)
-            .alongWith(m_launcher.moveClawToSetpoint(0.27))));
+        // m_scoreController.b().onTrue(
+        //     m_launcher.moveClawToSetpoint(0.50)
+        //     .alongWith(m_elevator.moveToSetpoint(50))
+        //     .andThen(m_elevator.moveToSetpoint(100)
+        //     .alongWith(m_launcher.moveClawToSetpoint(0.27))));
 
-        // Stow Command
-        m_scoreController.y().onTrue(
-            m_elevator.moveToSetpoint(50)
-            .andThen(m_launcher.moveClawToSetpoint(1.0)
-            .alongWith(m_elevator.moveToSetpoint(10))));
+        // Launcher Command
+        m_scoreController.rightTrigger().whileTrue(
+            m_elevator.moveToSetpoint(10)
+            .alongWith(new visionLauncherRotation(m_launcher, m_vision))
+        );
+        m_scoreController.rightTrigger().onFalse(m_launcher.moveClawToSetpoint(1.05)
+            .alongWith(m_elevator.moveToSetpoint(5.0)));
 
         m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
         m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
