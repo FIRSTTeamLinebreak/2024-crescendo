@@ -79,5 +79,8 @@ public class Elevator extends PIDSubsystem {
     @Override
     public void periodic() {
         super.periodic();
+        new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", getMeasurement()));
+        new InstantCommand(() -> SmartDashboard.putNumber("Claw setpoint", getSetpoint()));
+
     }
 }

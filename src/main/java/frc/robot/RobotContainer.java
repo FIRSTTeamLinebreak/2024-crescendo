@@ -2,14 +2,17 @@ package frc.robot;
 
 import static frc.robot.Util.applyLinearDeadZone;
 
+import java.util.function.Supplier;
+
+import org.ejml.equation.Function;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.JoystickConstants;
@@ -68,7 +71,13 @@ public class RobotContainer {
                 () -> m_driveController.getLeftX() * -1, () -> m_driveController.getLeftY(), () -> {
                     // Rotation
                     double angle = m_vision.getTargetAngle();
-                    if (m_driveController.getHID().getAButton() && m_vision.hasTargets()) {
+                    if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 3) {
+                        return visionPID.calculate(m_swerveDrive.getRotation2d().getDegrees(), angle);
+                    }
+                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 5) {
+                        return visionPID.calculate(angle, 0);
+                    }
+                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 11) {
                         return visionPID.calculate(angle, 0);
                     }
 
@@ -114,17 +123,20 @@ public class RobotContainer {
         m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
         m_elevator.setPoint(m_elevator.getMeasurement());
 
-        m_scoreController.a().onTrue(new InstantCommand(() -> {
-            m_launcher.setLauncherSpeed(0.3);
-            m_launcher.setControlSpeed(0.1);
-            m_intake.setSpeed(0.3);
-        }));
-        m_scoreController.a().onFalse(new InstantCommand(() -> {
-            m_launcher.setLauncherSpeed(0.0);
-            m_launcher.setControlSpeed(0.05);
-            m_intake.setSpeed(0.0);
-        }));
-        m_scoreController.b().onTrue(
+        // Intake motors - hold for on and off
+        // m_scoreController.a().onTrue(new InstantCommand(() -> {
+        //     m_launcher.setLauncherSpeed(0.3);
+        //     m_launcher.setControlSpeed(0.1);
+        //     m_intake.setSpeed(0.3);
+        // }));
+        // m_scoreController.a().onFalse(new InstantCommand(() -> {
+        //     m_launcher.setLauncherSpeed(0.0);
+        //     m_launcher.setControlSpeed(0.05);
+        //     m_intake.setSpeed(0.0);
+        // }));
+
+        // Launch motors - hold for on and off
+        m_scoreController.a().onTrue(
             new InstantCommand(() -> {
                 m_launcher.setLauncherSpeed(-1.0);
             })
@@ -132,40 +144,69 @@ public class RobotContainer {
                 .withTimeout(0.25)
                 .andThen(new InstantCommand(() -> {
                     m_launcher.setControlSpeed(-1.0);
+            }))
+                .repeatedly()
+                .withTimeout(1.0)
+                .andThen(new InstantCommand(() -> {
+                    m_launcher.setControlSpeed(0.0);
+                    m_launcher.setLauncherSpeed(0.0);
                 })));
-        m_scoreController.b().onFalse(new InstantCommand(() -> {
-            m_launcher.setLauncherSpeed(0.0);
-            m_launcher.setControlSpeed(0.0);
-        }));
 
-        Command stow = m_elevator.moveToSetpoint(50)
+        Supplier<Command> stow = () -> {
+            return m_elevator.moveToSetpoint(50)
             .andThen(m_launcher.moveClawToSetpoint(1.0)
             .alongWith(m_elevator.moveToSetpoint(10)));
+        };
+        
+        // .905
+        // .893
 
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
-            m_elevator.moveToSetpoint(50)
-            .andThen(m_launcher.moveClawToSetpoint(0.042))
-            .andThen(m_elevator.moveToSetpoint(37)));
-        m_scoreController.leftTrigger().onFalse(m_elevator.moveToSetpoint(50)
+            (m_elevator.moveToSetpoint(50)
             .alongWith(m_launcher.moveClawToSetpoint(0.5))
+            .andThen(m_launcher.moveClawToSetpoint(0.042))
+            .andThen(m_elevator.moveToSetpoint(37))
+            ).alongWith(new InstantCommand(() -> {
+                m_launcher.setLauncherSpeed(0.3);
+                m_launcher.setControlSpeed(0.1);
+                m_intake.setSpeed(0.3);
+            })));
+        m_scoreController.leftTrigger().onFalse((
+            m_elevator.moveToSetpoint(50)
+            .alongWith(m_launcher.moveClawToSetpoint(0.6))
             .andThen(m_launcher.moveClawToSetpoint(1.0)
-            .alongWith(m_elevator.moveToSetpoint(5.0))));
+            .alongWith(m_elevator.moveToSetpoint(5.0)))
+            ).alongWith(new InstantCommand(() -> {
+                m_launcher.setLauncherSpeed(0.0);
+                m_launcher.setControlSpeed(0.05);
+                m_intake.setSpeed(0.0);
+        })));
 
         // Amp Command
-        // m_scoreController.b().onTrue(
-        //     m_launcher.moveClawToSetpoint(0.50)
-        //     .alongWith(m_elevator.moveToSetpoint(50))
-        //     .andThen(m_elevator.moveToSetpoint(100)
-        //     .alongWith(m_launcher.moveClawToSetpoint(0.27))));
+        m_scoreController.povUp().onTrue(
+            m_launcher.moveClawToSetpoint(0.50)
+            .alongWith(m_elevator.moveToSetpoint(50))
+            .andThen(m_elevator.moveToSetpoint(100)
+            .alongWith(m_launcher.moveClawToSetpoint(0.27))));
+        m_scoreController.povUp().onFalse(stow.get());
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
-            m_elevator.moveToSetpoint(10)
-            .alongWith(new visionLauncherRotation(m_launcher, m_vision))
+            stow.get().andThen(
+                new visionLauncherRotation(m_launcher, m_vision, m_elevator)
+            )
         );
-        m_scoreController.rightTrigger().onFalse(m_launcher.moveClawToSetpoint(1.05)
-            .alongWith(m_elevator.moveToSetpoint(5.0)));
+        m_scoreController.rightTrigger().onFalse(stow.get());
+
+        // Trap
+        m_scoreController.povRight().onTrue(
+            m_elevator.moveToSetpoint(48)
+            .andThen(m_launcher.moveClawToSetpoint(.905)));
+        
+
+        // stow
+        m_scoreController.leftBumper().onTrue(stow.get());
 
         m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
         m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
@@ -190,6 +231,8 @@ public class RobotContainer {
         launcherCommand.addRequirements(m_launcher);
         m_launcher.setDefaultCommand(launcherCommand);
         new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", m_launcher.getMeasurement()));
+
+        m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
     }
 
     public void initTest() {
@@ -223,5 +266,6 @@ public class RobotContainer {
         launcherCommand.addRequirements(m_launcher);
         m_launcher.setDefaultCommand(launcherCommand);
         new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", m_launcher.getMeasurement()));
+
     }
 }

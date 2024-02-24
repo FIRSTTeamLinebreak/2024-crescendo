@@ -33,7 +33,7 @@ public class Launcher extends SubsystemBase {
     private double rotationSetpoint;
 
     private double upperLimit = 1.0;
-    private double lowerLimit = 0.042;
+    private double lowerLimit = 0.02;
 
     public Launcher(
             int flyWheelLeaderID,
