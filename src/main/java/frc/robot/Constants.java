@@ -66,11 +66,12 @@ public final class Constants {
             }
 
             public static final class ClawRotation {
-                public static final double kP = 1.3;
-                public static final double kI = 0.0;
-                public static final double kD = 0.0;
+                public static final double kP = 0.75;
+                public static final double kI = 0.09;
+                public static final double kD = 0.003;
+                public static final double kFF = 0.035;
 
-                public static final double kT = 0.002;
+                public static final double kT = 0.0075;
             }
 
             public static final class AutoTranslation {
@@ -123,8 +124,8 @@ public final class Constants {
         public static final double joystickDeadZone = 0.1;
         public static final double triggerDeadZone = 0.1;
 
-        public static final double xySpeedMultiplier = 1; // Speed multiplier in m/s(?)
-        public static final double turningSpeedMultiplier = 1.25;
+        public static final double xySpeedMultiplier = 1.35; // Speed multiplier in m/s(?)
+        public static final double turningSpeedMultiplier = 1.5; // Turning multiplier in m/s
         public static final double slowTurningDivisor = 2;
     }
 }

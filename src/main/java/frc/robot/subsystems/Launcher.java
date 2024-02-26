@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -117,7 +118,10 @@ public class Launcher extends SubsystemBase {
 
         if (rotationPIDEnabled) {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
-            launcherRotation.set(calculatedSpeed);
+            double clampedSpeed = MathUtil.clamp(calculatedSpeed, -0.5, 0.5);
+            double feedForward = Math.abs(Math.sin(getMeasurement() * Math.PI) * PID.ClawRotation.kFF);
+            launcherRotation.set(clampedSpeed + feedForward);
+            // launcherRotation.set(feedForward);
         } else {
             launcherRotation.set(0.0);
         }
