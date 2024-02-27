@@ -13,19 +13,19 @@ public class Vision extends SubsystemBase {
 
     private final NetworkTable table;
     private final NetworkTableEntry tv;
-    private final NetworkTableEntry tagPose;
     private final NetworkTableEntry tid;
+    private final NetworkTableEntry tagPose;
+    private final NetworkTableEntry botPose;
     private final double maxLauncherSetpoint = .88;
     private final double minLauncherSetpoint = .77;
     private long lastTagSeen = -1;
-    
-    
 
     public Vision() {
         table = NetworkTableInstance.getDefault().getTable("limelight");
         tv = table.getEntry("tv");
-        tagPose = table.getEntry("targetpose_robotspace");
         tid = table.getEntry("tid");
+        tagPose = table.getEntry("targetpose_robotspace");
+        botPose = table.getEntry("botpose");
     }
 
     /** Run approx. every 20 ms. */
@@ -49,6 +49,15 @@ public class Vision extends SubsystemBase {
         double lengthToBase = tagPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0})[2];
         SmartDashboard.putNumber("distance to base", lengthToBase);
         return lengthToBase;
+    }
+
+    public Pose2d getRobotPose() {
+        double[] pose = botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
+        return new Pose2d(
+            pose[0] * Units.inchesToMeters(1),
+            pose[1] * Units.inchesToMeters(1),
+            new Rotation2d(pose[5])
+        );
     }
 
     public double getVisionClawSetpoint() {
