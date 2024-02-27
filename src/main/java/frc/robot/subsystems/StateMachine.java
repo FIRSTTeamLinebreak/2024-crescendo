@@ -40,8 +40,8 @@ public class StateMachine extends SubsystemBase {
     private final Vision m_vision;
     private final Intake m_intake;
 
-    private State currentState;
-    private State lastState;
+    private State currentState = State.stow;
+    private State lastState = State.stow;
 
     public StateMachine(Launcher m_launcher, Elevator m_elevator, Vision m_vision, Intake m_intake) {
         this.m_launcher = m_launcher;
@@ -70,6 +70,9 @@ public class StateMachine extends SubsystemBase {
                             return;
                         case amp:
                         case intake:
+                            m_launcher.setControlSpeed(.05);
+                            m_intake.setSpeed(0);
+                            m_launcher.setLauncherSpeed(0);
                             m_elevator.moveToSetpoint(50)
                                     .alongWith(m_launcher.moveClawToSetpoint(0.5))
                                     .andThen(m_launcher.moveClawToSetpoint(1.0)
@@ -105,13 +108,13 @@ public class StateMachine extends SubsystemBase {
                 case speaker:
                     switch (lastState) {
                         case stow:
-                            new visionLauncherRotation(m_launcher, m_vision, m_elevator).schedule();;
+                            new visionLauncherRotation(m_launcher, m_vision, m_elevator).until(() -> currentState != State.stow).schedule();
                             break;
                         case intake:
                             m_launcher.moveClawToSetpoint(0.50)
                                     .alongWith(m_elevator.moveToSetpoint(50))
                                     .andThen(m_elevator.moveToSetpoint(100)
-                                            .alongWith(new visionLauncherRotation(m_launcher, m_vision, m_elevator)))
+                                            .alongWith(new visionLauncherRotation(m_launcher, m_vision, m_elevator)).until(() -> currentState != State.intake))
                                     .schedule();
                                 break;
                         default:
@@ -147,21 +150,12 @@ public class StateMachine extends SubsystemBase {
                 case intake:
                     switch (lastState) {
                         case stow:
-                            m_launcher.setControlSpeed(-.05);
                             m_elevator.moveToSetpoint(50)
                                 .alongWith(m_launcher.moveClawToSetpoint(.5)
-                            .andThen(m_launcher.moveClawToSetpoint(1.0))
-                                .alongWith(m_elevator.moveToSetpoint(10)))
+                            .andThen(m_launcher.moveClawToSetpoint(.042))
+                                .alongWith(m_elevator.moveToSetpoint(37.5)))
                             .schedule();
                             break;
-                        case intake:
-                            m_elevator.moveToSetpoint(50)
-                                .alongWith(m_launcher.moveClawToSetpoint(0.5))
-                            .andThen(m_launcher.moveClawToSetpoint(0.042))
-                            .andThen(m_elevator.moveToSetpoint(37)).schedule();
-                            break;
-                        
-
                     }
                     break;
             }
@@ -178,6 +172,7 @@ public class StateMachine extends SubsystemBase {
                     break;
             }
         }
+        lastState = currentState;
     }
 
     public Command Stow() {
