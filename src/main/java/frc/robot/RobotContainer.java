@@ -2,6 +2,7 @@ package frc.robot;
 
 import static frc.robot.Util.applyLinearDeadZone;
 
+import frc.robot.subsystems.Odomentry;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -37,6 +38,7 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final SwerveDrive m_swerveDrive;
+    private final Odomentry m_odometry;
     private final Vision m_vision;
     private final LED m_led;
     private final Launcher m_launcher;
@@ -57,6 +59,7 @@ public class RobotContainer {
     public RobotContainer() {
         m_swerveDrive = new SwerveDrive();
         m_vision = new Vision();
+        m_odometry = new Odomentry(m_swerveDrive, m_vision);
         m_led = new LED(0, 10);
         m_launcher = new Launcher(12, 13, 11, 14);
         m_elevator = new Elevator(6, 7);
@@ -159,7 +162,7 @@ public class RobotContainer {
             .andThen(m_launcher.moveClawToSetpoint(1.0)
             .alongWith(m_elevator.moveToSetpoint(10)));
         };
-        
+
         // .905
         // .893
 
@@ -206,7 +209,7 @@ public class RobotContainer {
         m_scoreController.povRight().onTrue(
             m_elevator.moveToSetpoint(48)
             .andThen(m_launcher.moveClawToSetpoint(.905)));
-        
+
         // stow
         m_scoreController.leftBumper().onTrue(stow.get());
 

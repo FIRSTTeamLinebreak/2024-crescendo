@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -16,13 +18,16 @@ public class Odomentry extends SubsystemBase {
     private final SwerveDrive m_dirveSubsystem;
     private final Vision m_vision;
 
-    private final StructArrayPublisher<Pose2d> m_poseArrayPublisher;
+    private final StructPublisher<Pose2d> m_poseOdoPublisher;
+    private final StructPublisher<Pose2d> m_poseVisPublisher;
 
     public Odomentry(SwerveDrive driveSubsystem, Vision vison) {
         m_dirveSubsystem = driveSubsystem;
         m_vision = vison;
-        m_poseArrayPublisher = NetworkTableInstance.getDefault()
-            .getStructArrayTopic("Pose_Array", Pose2d.struct).publish();
+        m_poseOdoPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("Pose_Odo", Pose2d.struct).publish();
+        m_poseVisPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("Pose_Vis", Pose2d.struct).publish();
 
         m_driveOdometry =
                 new SwerveDriveOdometry(
@@ -61,7 +66,8 @@ public class Odomentry extends SubsystemBase {
         Pose2d odometryPose = m_driveOdometry.getPoseMeters();
         Pose2d visionPose = m_vision.getRobotPose();
 
-        m_poseArrayPublisher.send(new Pose2d[] {odometryPose, visionPose});
+        m_poseOdoPublisher.set(odometryPose);
+        m_poseVisPublisher.set(visionPose);
     }
 
 }

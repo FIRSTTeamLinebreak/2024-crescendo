@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagDetection;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -25,7 +27,7 @@ public class Vision extends SubsystemBase {
         tv = table.getEntry("tv");
         tid = table.getEntry("tid");
         tagPose = table.getEntry("targetpose_robotspace");
-        botPose = table.getEntry("botpose");
+        botPose = table.getEntry("botpose_wpiblue");
     }
 
     /** Run approx. every 20 ms. */
@@ -51,11 +53,11 @@ public class Vision extends SubsystemBase {
     }
 
     public Pose2d getRobotPose() {
-        double[] pose = botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
+        Double[] pose = botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
         return new Pose2d(
-            pose[0] * Units.inchesToMeters(1),
-            pose[1] * Units.inchesToMeters(1),
-            new Rotation2d(pose[5])
+            pose[0],
+            pose[1],
+            new Rotation2d(Units.degreesToRadians(pose[5]))
         );
     }
 
