@@ -47,7 +47,6 @@ public class Vision extends SubsystemBase {
 
     public double getLengthToBase() {
         double lengthToBase = tagPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0})[2];
-        SmartDashboard.putNumber("distance to base", lengthToBase);
         return lengthToBase;
     }
 
