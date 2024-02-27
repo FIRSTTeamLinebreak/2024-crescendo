@@ -41,38 +41,27 @@ public class visionLauncherRotation extends Command {
     /** Called repeatedly while the command is scheduled. */
     @Override
     public void execute() {
-        // double slope = (maxLauncherSetpoint - minLauncherSetpoint) / 1.6;
-        // setpoint = (filter.calculate(m_vision.getLengthToBase()) * slope + minLauncherSetpoint);
-        // m_launcher.setRotationSetpoint(setpoint);
-        
-        if(m_vision.lastTagSeen() == 3 || m_vision.lastTagSeen() == 4) {
-            // double slope = ((minLauncherSetpoint - maxLauncherSetpoint) / (2.8 - 1.2));
-            if(m_vision.getAprilTagID() != -1) {
-                measurement = filter.calculate(m_vision.getLengthToBase());
-                double slope = Math.sqrt((2 * 9.81 * (measurement + 1.2)));
-                // m_launcher.setRotationSetpoint(.17 + (maxLauncherSetpoint + (measurement + 1.2) * slope));
-                m_launcher.setRotationSetpoint(maxLauncherSetpoint + (maxLauncherSetpoint * slope));
-                // velocity Y = sqrt(2 * 9.81 * deltaY)
-                // velocity y / delta Y = time
-                // length to base /  time = velocity x
-                // sqrt(vx^2 + vy^2) = velocity
-                // velocity bvASZXgj
+        // if(m_vision.getAprilTagID() != -1) {
+        //     measurement = filter.calculate(m_vision.getLengthToBase());
+        //     double slope = Math.sqrt((2 * 9.81 * (measurement + 1.2))) * -1;
+        //     double slope = ((minLauncherSetpoint - maxLauncherSetpoint) / (2.8 - 1.2));
+        //     m_launcher.setRotationSetpoint(.17 + (maxLauncherSetpoint + (measurement + 1.2) * slope));
+        //     m_launcher.setRotationSetpoint(maxLauncherSetpoint + (maxLauncherSetpoint * slope));
+        // }
+
+        if(m_vision.getAprilTagID() != -1) {
+            measurement = filter.calculate(m_vision.getLengthToBase());
+            double X = Math.tanh(1.076325 / (measurement - .1778)) * 57.3248;
+            double Y = (((99.048 - (3.3042 * X) + (.0713 * X * X) - (.00035 * X * X * X)) * .0174444) / Math.PI) + .5;
+            if(Y < .5){
+                m_launcher.setRotationSetpoint(.5);
             }
-            
-        }
-        else if(m_vision.lastTagSeen() == 5) {
-            m_elevator.moveToSetpoint(100).andThen(m_launcher.moveClawToSetpoint(.48));
-        }
-
-        else if(m_vision.lastTagSeen() == 11) {
-            m_elevator.moveToSetpoint(48).andThen(m_launcher.moveClawToSetpoint(.905));
-        }
-
-        else if(m_vision.lastTagSeen() == 5) {
-            m_launcher.setRotationSetpoint(.27);
-        }
-        else {
-            m_launcher.setRotationSetpoint(1.0);
+            else if(Y > 1.0) {
+                m_launcher.setRotationSetpoint(.95);
+            }
+            else {
+                m_launcher.setRotationSetpoint((((99.048 - (3.3042 * X) + (.0713 * X * X) - (.00035 * X * X * X)) * .0174444) / Math.PI) + .5);
+            }
         }
 
         SmartDashboard.putNumber("Last April Tag Seen", m_vision.lastTagSeen());
