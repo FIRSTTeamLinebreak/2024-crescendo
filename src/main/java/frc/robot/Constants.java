@@ -69,7 +69,7 @@ public final class Constants {
                 public static final double kP = 0.75;
                 public static final double kI = 0.09;
                 public static final double kD = 0.003;
-                public static final double kFF = 0.035;
+                public static final double kFF = 0.037;
 
                 public static final double kT = 0.0075;
             }
