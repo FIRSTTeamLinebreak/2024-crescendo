@@ -2,8 +2,6 @@ package frc.robot;
 
 import static frc.robot.Util.applyLinearDeadZone;
 
-import java.util.function.Supplier;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -74,13 +72,15 @@ public class RobotContainer {
                 () -> m_driveController.getLeftX() * -1, () -> m_driveController.getLeftY(), () -> {
                     // Rotation
                     double angle = m_vision.getTargetAngle();
-                    if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 3) {
+                    SmartDashboard.putNumber("angle", angle);
+                    SmartDashboard.putNumber("triggeraxis", m_driveController.getHID().getRightTriggerAxis());
+                    if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 3) {
                         return visionPID.calculate(m_swerveDrive.getRotation2d().getDegrees(), angle);
                     }
-                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 5) {
+                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 5) {
                         return visionPID.calculate(angle, 0);
                     }
-                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.getAprilTagID() == 11) {
+                    else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 11) {
                         return visionPID.calculate(angle, 0);
                     }
 
@@ -115,7 +115,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
 
-        System.out.println("Auto command");
+        // System.out.println("Auto command");
         return AutoBuilder.followPath(path);
         // return autoChooser.getSelected();
     }
@@ -138,13 +138,22 @@ public class RobotContainer {
         //     m_intake.setSpeed(0.0);
         // }));
 
+        m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
+
+        Command cancelIntakeCommand = new InstantCommand(() -> {
+                m_launcher.setLauncherSpeed(0.0);
+                m_launcher.setControlSpeed(0.05);
+                m_intake.setSpeed(0.0);
+            });
+
+
         // Launch motors - hold for on and off
-        m_scoreController.a().onTrue(
+        m_scoreController.b().onTrue(
             new InstantCommand(() -> {
                 m_launcher.setLauncherSpeed(-1.0);
             })
                 .repeatedly()
-                .withTimeout(0.25)
+                .withTimeout(0.5)
                 .andThen(new InstantCommand(() -> {
                     m_launcher.setControlSpeed(-1.0);
             }))
@@ -154,63 +163,73 @@ public class RobotContainer {
                     m_launcher.setControlSpeed(0.0);
                     m_launcher.setLauncherSpeed(0.0);
                 })));
-
-        Supplier<Command> stow = () -> {
-            // @TODO
-            return m_elevator.moveToSetpoint(50)
-            .andThen(m_launcher.moveClawToSetpoint(1.0)
-            .alongWith(m_elevator.moveToSetpoint(10)));
-        };
-
+        
         // .905
         // .893
 
         // Intake Command
-            m_scoreController.leftTrigger().onTrue(
-                (m_elevator.moveToSetpoint(50)
-                .alongWith(m_launcher.moveClawToSetpoint(0.5))
-                .andThen(m_launcher.moveClawToSetpoint(0.042))
-                .andThen(m_elevator.moveToSetpoint(37))
-                ).alongWith(new InstantCommand(() -> {
-                    m_launcher.setLauncherSpeed(0.3);
-                    m_launcher.setControlSpeed(0.1);
-                    m_intake.setSpeed(0.3);
-                })));
-        // }
-        m_scoreController.leftTrigger().onFalse((
-            m_elevator.moveToSetpoint(50)
-            .alongWith(m_launcher.moveClawToSetpoint(0.40))
-            .andThen(m_launcher.moveClawToSetpoint(1.0)
-            .alongWith(m_elevator.moveToSetpoint(5.0)))
+        m_scoreController.leftTrigger().onTrue(
+            new InstantCommand(() -> {
+                if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                    new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+                }})
+            .andThen(
+            (m_elevator.moveToSetpoint(50)
+            .alongWith(m_launcher.moveClawToSetpoint(0.5))
+            .andThen(m_launcher.moveClawToSetpoint(0.042))
+            .andThen(m_elevator.moveToSetpoint(37))
             ).alongWith(new InstantCommand(() -> {
-                m_launcher.setLauncherSpeed(0.0);
-                m_launcher.setControlSpeed(0.05);
-                m_intake.setSpeed(0.0);
-        })));
+                m_launcher.setLauncherSpeed(0.37);
+                m_launcher.setControlSpeed(0.1);
+                m_intake.setSpeed(0.45);
+            }))));
 
         // Amp Command
         m_scoreController.povUp().onTrue(
+            new InstantCommand(() -> {
+                    if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                        new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+                    }})
+            .andThen(
             (m_launcher.moveClawToSetpoint(0.50)
             .alongWith(m_elevator.moveToSetpoint(50))
             .andThen(m_elevator.moveToSetpoint(100)
-            .alongWith(m_launcher.moveClawToSetpoint(0.27)))));
-        m_scoreController.povUp().onFalse(stow.get());
+            .alongWith(m_launcher.moveClawToSetpoint(0.27))))));
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
-            // (stow.get()).andThen(
+            new InstantCommand(() -> {
+                    if(!(m_elevator.atSetpoint())) {
+                        new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+                    }})
+            .andThen(
                 new visionLauncherRotation(m_launcher, m_vision, m_elevator)
-            // )
+            )
         );
-        m_scoreController.rightTrigger().onFalse(stow.get());
 
         // Trap
         m_scoreController.povRight().onTrue(
+            new InstantCommand(() -> {
+                    if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                        new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+                    }})
+            .andThen(
             m_elevator.moveToSetpoint(48)
-            .andThen(m_launcher.moveClawToSetpoint(.905)));
+            .andThen(m_launcher.moveClawToSetpoint(.905))));
 
         // stow
-        m_scoreController.leftBumper().onTrue(stow.get());
+        m_scoreController.leftBumper().onTrue(
+            new InstantCommand(() -> {
+                if(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint()) {
+                    new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+                }})
+                .andThen(
+                    m_elevator.moveToSetpoint(50)
+                .andThen(m_launcher.moveClawToSetpoint(1.0)
+                    .alongWith(m_elevator.moveToSetpoint(10)))
+                    .alongWith(
+                        cancelIntakeCommand
+            )));
 
         m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
         m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
@@ -235,11 +254,6 @@ public class RobotContainer {
         launcherCommand.addRequirements(m_launcher);
         m_launcher.setDefaultCommand(launcherCommand);
         new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", m_launcher.getMeasurement()));
-
-        m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
-
-        // m_launcher.enableRotationPID();
-        // m_elevator.enable();
     }
 
     public void initTest() {
