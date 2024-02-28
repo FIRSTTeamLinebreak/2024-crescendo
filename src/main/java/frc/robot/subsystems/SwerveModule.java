@@ -146,6 +146,6 @@ public class SwerveModule {
         return new SwerveModulePosition(
                 driveController.getPosition().getValueAsDouble()
                         * SwerveConstants.Kinematics.driveRotToMeters,
-                new Rotation2d(getTurningPosition()));
+                new Rotation2d(getTurningPosition() * 2 * Math.PI));
     }
 }

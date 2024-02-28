@@ -2,13 +2,14 @@ package frc.robot;
 
 import static frc.robot.Util.applyLinearDeadZone;
 
-import frc.robot.subsystems.Odomentry;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -22,7 +23,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Launcher;
-import frc.robot.subsystems.StateMachine;
+import frc.robot.subsystems.Odomentry;
 import frc.robot.subsystems.SwerveDrive;
 import frc.robot.subsystems.Vision;
 
@@ -46,8 +47,7 @@ public class RobotContainer {
     private final Intake m_intake;
 
     private final PIDController visionPID;
-    // private final StateMachine stateMachine;
-    // private final SendableChooser<Command> autoChooser;
+    private final SendableChooser<Command> autoChooser;
 
     private final CommandXboxController m_driveController;
     private final CommandXboxController m_scoreController;
@@ -67,7 +67,6 @@ public class RobotContainer {
         m_intake = new Intake(5);
 
         visionPID = new PIDController(0.02, 0, 0);
-        // stateMachine = new StateMachine(m_launcher, m_elevator, m_vision);
 
         m_driveController = new CommandXboxController(JoystickConstants.driveControllerId);
         m_scoreController = new CommandXboxController(JoystickConstants.scoreControllerId);
@@ -90,22 +89,22 @@ public class RobotContainer {
                 }, () -> !m_driveController.getHID().getRightBumper());
         new SetLEDRed(m_led).schedule();
 
-        // PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
-        //     // Do whatever you want with the pose here
-        //     SmartDashboard.putString("PP Cur Pos", pose.toString());
-        // });
+        PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+            // Do whatever you want with the pose here
+            SmartDashboard.putString("PP Cur Pos", pose.toString());
+        });
 
-        // // Logging callback for target robot pose
-        // PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
-        //     // Do whatever you want with the pose here
-        //     SmartDashboard.putString("PP Tgt Pos", pose.toString());
-        // });
+        // Logging callback for target robot pose
+        PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+            // Do whatever you want with the pose here
+            SmartDashboard.putString("PP Tgt Pos", pose.toString());
+        });
 
         // Build an auto chooser. This will use Commands.none() as the default option.
-        // autoChooser = AutoBuilder.buildAutoChooser("FirstAuto");
+        autoChooser = AutoBuilder.buildAutoChooser("FirstAuto");
 
-        // SmartDashboard.putData("Auto Chooser", autoChooser);
-        // System.out.println(SmartDashboard.getData("Auto Chooser"));
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+        System.out.println(SmartDashboard.getData("Auto Chooser"));
     }
 
     /**
