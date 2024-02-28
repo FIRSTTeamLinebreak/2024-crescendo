@@ -56,8 +56,8 @@ public class Launcher extends SubsystemBase {
         controlWheels.setIdleMode(IdleMode.kBrake);
         launcherRotation.setIdleMode(IdleMode.kBrake);
 
-        flyWheelLeader.setSmartCurrentLimit(20);
-        flyWheelFollower.setSmartCurrentLimit(20);
+        flyWheelLeader.setSmartCurrentLimit(30);
+        flyWheelFollower.setSmartCurrentLimit(30);
         controlWheels.setSmartCurrentLimit(30);
         launcherRotation.setSmartCurrentLimit(40);
 
