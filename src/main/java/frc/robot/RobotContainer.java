@@ -21,7 +21,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Launcher;
-import frc.robot.subsystems.Odomentry;
+import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.SwerveDrive;
 import frc.robot.subsystems.Vision;
 
@@ -37,7 +37,7 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final SwerveDrive m_swerveDrive;
-    private final Odomentry m_odometry;
+    private final Odometry m_odometry;
     private final Vision m_vision;
     private final LED m_led;
     private final Launcher m_launcher;
@@ -57,7 +57,7 @@ public class RobotContainer {
     public RobotContainer() {
         m_swerveDrive = new SwerveDrive();
         m_vision = new Vision();
-        m_odometry = new Odomentry(m_swerveDrive, m_vision);
+        m_odometry = new Odometry(m_swerveDrive, m_vision);
         m_led = new LED(0, 10);
         m_launcher = new Launcher(12, 13, 11, 14);
         m_elevator = new Elevator(6, 7);
@@ -71,11 +71,11 @@ public class RobotContainer {
         m_SwerveDriveCommand = new JoystickDriveCommand(m_swerveDrive,
                 () -> m_driveController.getLeftX() * -1, () -> m_driveController.getLeftY(), () -> {
                     // Rotation
-                    double angle = m_vision.getTargetAngle();
+                    double angle = m_odometry.getRobotPose().getRotation().getRadians();
                     SmartDashboard.putNumber("angle", angle);
                     SmartDashboard.putNumber("triggeraxis", m_driveController.getHID().getRightTriggerAxis());
                     if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 3) {
-                        return visionPID.calculate(m_swerveDrive.getRotation2d().getDegrees(), angle);
+                        return visionPID.calculate(angle, 0);
                     }
                     else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 5) {
                         return visionPID.calculate(angle, 0);
@@ -170,7 +170,7 @@ public class RobotContainer {
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
             new InstantCommand(() -> {
-                if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                if(!(m_elevator.atPoint() && m_launcher.atPoint())) {
                     new InstantCommand(CommandScheduler.getInstance()::cancelAll);
                 }})
             .andThen(
@@ -187,7 +187,8 @@ public class RobotContainer {
         // Amp Command
         m_scoreController.povUp().onTrue(
             new InstantCommand(() -> {
-                    if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                    if(!(m_elevator.atPoint() && m_launcher.atPoint())) {
+                        SmartDashboard.putBoolean("cancelled", true);
                         new InstantCommand(CommandScheduler.getInstance()::cancelAll);
                     }})
             .andThen(
@@ -199,7 +200,7 @@ public class RobotContainer {
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
             new InstantCommand(() -> {
-                    if(!(m_elevator.atSetpoint())) {
+                    if(!(m_elevator.atPoint())) {
                         new InstantCommand(CommandScheduler.getInstance()::cancelAll);
                     }})
             .andThen(
@@ -210,7 +211,7 @@ public class RobotContainer {
         // Trap
         m_scoreController.povRight().onTrue(
             new InstantCommand(() -> {
-                    if(!(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint())) {
+                    if(!(m_elevator.atPoint() && m_launcher.atPoint())) {
                         new InstantCommand(CommandScheduler.getInstance()::cancelAll);
                     }})
             .andThen(
@@ -220,7 +221,7 @@ public class RobotContainer {
         // stow
         m_scoreController.leftBumper().onTrue(
             new InstantCommand(() -> {
-                if(m_elevator.atSetpoint() && m_launcher.rotationAtSetpoint()) {
+                if(m_elevator.atPoint() && m_launcher.atPoint()) {
                     new InstantCommand(CommandScheduler.getInstance()::cancelAll);
                 }})
                 .andThen(
@@ -233,8 +234,8 @@ public class RobotContainer {
 
         m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
         m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
-        m_scoreController.x().onFalse(new InstantCommand(m_elevator::disable, m_elevator));
-        m_scoreController.x().onFalse(new InstantCommand(m_launcher::disableRotationPID, m_launcher));
+        // m_scoreController.x().onFalse(new InstantCommand(m_elevator::disable, m_elevator));
+        // m_scoreController.x().onFalse(new InstantCommand(m_launcher::disableRotationPID, m_launcher));
 
         Command elevatorCommand = new InstantCommand(() -> {
             double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getLeftY())*1.5;

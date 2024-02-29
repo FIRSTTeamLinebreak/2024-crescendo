@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
 
-public class Odomentry extends SubsystemBase {
+public class Odometry extends SubsystemBase {
 
     private final SwerveDriveOdometry m_driveOdometry;
     private final SwerveDrive m_driveSubsystem;
@@ -23,7 +23,7 @@ public class Odomentry extends SubsystemBase {
     private final StructPublisher<Pose2d> m_poseOdoPublisher;
     private final StructPublisher<Pose2d> m_poseVisPublisher;
 
-    public Odomentry(SwerveDrive driveSubsystem, Vision vison) {
+    public Odometry(SwerveDrive driveSubsystem, Vision vison) {
         m_driveSubsystem = driveSubsystem;
         m_vision = vison;
         m_poseOdoPublisher = NetworkTableInstance.getDefault()
@@ -39,7 +39,7 @@ public class Odomentry extends SubsystemBase {
                         new Pose2d(5.0, 13.5, new Rotation2d()));
 
         AutoBuilder.configureHolonomic(
-                m_driveOdometry::getPoseMeters, // Needs to be updated to pose estimation
+                this::getRobotPose, // Needs to be updated to pose estimation
                 (Pose2d pose) ->
                         m_driveOdometry.resetPosition(
                                 m_driveSubsystem.getRotation2d(),
@@ -56,6 +56,10 @@ public class Odomentry extends SubsystemBase {
                     return false;
                 },
                 m_driveSubsystem);
+    }
+
+    public Pose2d getRobotPose() {
+        return m_driveOdometry.getPoseMeters();
     }
 
     @Override
