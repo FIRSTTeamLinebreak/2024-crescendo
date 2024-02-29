@@ -34,6 +34,7 @@ public class Vision extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Robot To Base", getLengthToBase());
+        SmartDashboard.putNumber("Last April Tag Seen", this.lastTagSeen());
     }
 
     // x y z roll pitch yaw
