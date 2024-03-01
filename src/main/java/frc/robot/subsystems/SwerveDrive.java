@@ -19,9 +19,12 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveModule frontRight;
     private final SwerveModule backLeft;
     private final SwerveModule backRight;
+    // private final Odometry m_odometry;
+    private final Vision m_vision;
 
     private final AHRS gyro;
-    private final double gyroOffset = 270.0;
+    private final double gyroOffset;
+    // private final double gyroOffset;
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive() {
@@ -39,6 +42,8 @@ public class SwerveDrive extends SubsystemBase {
         backRight.reset();
         backLeft.reset();
 
+        m_vision = new Vision();
+        gyroOffset = ((360 / (2 * Math.PI)) * m_vision.getTargetAngle()) + 270.0;
         gyro = new AHRS(SerialPort.Port.kMXP);
         this.InitGyro();
     }

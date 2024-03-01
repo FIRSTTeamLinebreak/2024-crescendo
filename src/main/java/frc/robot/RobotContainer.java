@@ -116,8 +116,8 @@ public class RobotContainer {
         PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
 
         // System.out.println("Auto command");
-        return AutoBuilder.followPath(path);
-        // return autoChooser.getSelected();
+        // return AutoBuilder.followPath(path);
+        return autoChooser.getSelected();
     }
 
     public void initTeleop() {
