@@ -75,7 +75,7 @@ public class RobotContainer {
                     SmartDashboard.putNumber("angle", angle);
                     SmartDashboard.putNumber("triggeraxis", m_driveController.getHID().getRightTriggerAxis());
                     if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 3) {
-                        return visionPID.calculate(angle, 0);
+                        return visionPID.calculate(angle, Math.tanh((m_odometry.getRobotPose().getY() - 8.308467) / (m_odometry.getRobotPose().getX() - 1.442593)));
                     }
                     else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 5) {
                         return visionPID.calculate(angle, 0);

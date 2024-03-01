@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
+import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants.PID;
 
 public class Elevator extends PIDSubsystem {
@@ -48,15 +49,6 @@ public class Elevator extends PIDSubsystem {
     }
 
     public boolean atSetpoint() {
-        double measurement = getMeasurement();
-        double tolerance = this.getController().getPositionTolerance();
-        double setpoint = this.getSetpoint();
-
-        SmartDashboard.putNumber("Ele setpoint", setpoint);
-        SmartDashboard.putNumber("Ele Measurement", measurement);
-        SmartDashboard.putNumber("Ele tolerance", tolerance);
-        SmartDashboard.putBoolean("Ele atSetpoint", this.getController().atSetpoint());
-
         return this.getController().atSetpoint();
     }
 
@@ -75,12 +67,18 @@ public class Elevator extends PIDSubsystem {
         return leftMotor.getEncoder().getPosition() * -1;
     }
 
+    public boolean atPoint() {
+        if(this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= this.getSetpoint() && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= this.getSetpoint()) {
+            return true;
+        }
+        return false;
+    }
     /** Run approx. every 20 ms. */
     @Override
     public void periodic() {
         super.periodic();
-        new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", getMeasurement()));
-        new InstantCommand(() -> SmartDashboard.putNumber("Claw setpoint", getSetpoint()));
-
+        SmartDashboard.putNumber("Ele setpoint", this.getSetpoint());
+        SmartDashboard.putNumber("Ele Measurement", getMeasurement());
+        SmartDashboard.putBoolean("Ele atSetpoint", this.getController().atSetpoint());
     }
 }

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants.PID;
 
 /* May need to change to a PID system for launcherRotation
@@ -96,6 +97,13 @@ public class Launcher extends SubsystemBase {
 
     public boolean rotationAtSetpoint() {
         return rotationPID.atSetpoint();
+    }
+
+    public boolean atPoint() {
+        if(this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= rotationSetpoint && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= rotationSetpoint) {
+            return true;
+        }
+        return false;
     }
 
     public void enableRotationPID() {
