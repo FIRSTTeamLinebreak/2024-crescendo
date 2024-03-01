@@ -126,18 +126,6 @@ public class RobotContainer {
         m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
         m_elevator.setPoint(m_elevator.getMeasurement());
 
-        // Intake motors - hold for on and off
-        // m_scoreController.a().onTrue(new InstantCommand(() -> {
-        //     m_launcher.setLauncherSpeed(0.3);
-        //     m_launcher.setControlSpeed(0.1);
-        //     m_intake.setSpeed(0.3);
-        // }));
-        // m_scoreController.a().onFalse(new InstantCommand(() -> {
-        //     m_launcher.setLauncherSpeed(0.0);
-        //     m_launcher.setControlSpeed(0.05);
-        //     m_intake.setSpeed(0.0);
-        // }));
-
         m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
 
         Command cancelIntakeCommand = new InstantCommand(() -> {

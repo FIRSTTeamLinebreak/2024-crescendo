@@ -52,13 +52,8 @@ public class Vision extends SubsystemBase {
         return lengthToBase;
     }
 
-    public Pose2d getRobotPose() {
-        Double[] pose = botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
-        return new Pose2d(
-            pose[0],
-            pose[1],
-            new Rotation2d(Units.degreesToRadians(pose[5]))
-        );
+    public Double[] getRobotPose() {
+        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
     }
 
     public double getVisionClawSetpoint() {
