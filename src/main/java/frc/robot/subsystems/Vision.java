@@ -54,7 +54,7 @@ public class Vision extends SubsystemBase {
     }
 
     public Double[] getRobotPose() {
-        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0});
+        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0,0.0});
     }
 
     public double getVisionClawSetpoint() {

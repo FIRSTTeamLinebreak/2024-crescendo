@@ -3,6 +3,7 @@ package frc.robot;
 import static frc.robot.Util.applyLinearDeadZone;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.JoystickConstants;
+import frc.robot.commands.AutoNoteLaunch;
 import frc.robot.commands.JoystickDriveCommand;
 import frc.robot.commands.SetLEDRed;
 import frc.robot.commands.visionLauncherRotation;
@@ -113,10 +115,13 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
+        // m_launcher.enableRotationPID();
+        // m_elevator.enable();
         PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
 
         // System.out.println("Auto command");
-        return AutoBuilder.followPath(path);
+        // return AutoBuilder.followPath(path);
+        return new InstantCommand();
         // return autoChooser.getSelected();
     }
 
@@ -125,6 +130,12 @@ public class RobotContainer {
 
         m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
         m_elevator.setPoint(m_elevator.getMeasurement());
+
+        NamedCommands.registerCommand("AutoNoteLaunch", new AutoNoteLaunch(m_swerveDrive, m_elevator, m_launcher, m_vision));
+
+        // m_launcher.enableRotationPID();
+        // m_elevator.enable();
+        // m_launcher.setControlSpeed(0.05);
 
         m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
 
@@ -151,6 +162,13 @@ public class RobotContainer {
                     m_launcher.setControlSpeed(0.0);
                     m_launcher.setLauncherSpeed(0.0);
                 })));
+
+        // m_scoreControllrfeffefef0er.a().onTrue(
+        //     new InstantCommand(() -> {
+        //         m_launcher.setLauncherSpeed(0.37);
+        //         m_launcher.setControlSpeed(0.1);
+        //         m_intake.setSpeed(0.45);
+        //     }));
         
         // .905
         // .893
@@ -187,14 +205,14 @@ public class RobotContainer {
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
-            new InstantCommand(() -> {
-                    if(!(m_elevator.atPoint())) {
-                        new InstantCommand(CommandScheduler.getInstance()::cancelAll);
-                    }})
-            .andThen(
+            // new InstantCommand(() -> {
+            //         if(!(m_elevator.atPoint())) {
+            //             new InstantCommand(CommandScheduler.getInstance()::cancelAll);
+            //         }})
+            // .andThen(
                 new visionLauncherRotation(m_launcher, m_vision, m_elevator)
-            )
-        );
+            );
+        // );
 
         // Trap
         m_scoreController.povRight().onTrue(
@@ -220,8 +238,8 @@ public class RobotContainer {
                         cancelIntakeCommand
             )));
 
-        m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
-        m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
+        // m_scoreController.x().onTrue(new InstantCommand(m_elevator::enable, m_elevator));
+        // m_scoreController.x().onTrue(new InstantCommand(m_launcher::enableRotationPID, m_launcher));
         // m_scoreController.x().onFalse(new InstantCommand(m_elevator::disable, m_elevator));
         // m_scoreController.x().onFalse(new InstantCommand(m_launcher::disableRotationPID, m_launcher));
 

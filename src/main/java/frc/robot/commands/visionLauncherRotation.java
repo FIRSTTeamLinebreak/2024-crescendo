@@ -53,7 +53,7 @@ public class visionLauncherRotation extends Command {
                 measurement = filter.calculate(m_vision.getLengthToBase());
                 // double X = Math.tanh(1.076325 / (measurement - .1778)) * 57.3248;
                 // double Y = (((99.048 - (3.3042 * X) + (.0713 * X * X) - (.00035 * X * X * X)) * .0174444) / Math.PI) + .5;
-                double angle = (Math.tanh(1.78 / (measurement - .51)) + (Math.PI / 2)) / Math.PI;
+                double angle = (Math.tanh(1.73 / (measurement - .51)) + (Math.PI / 2)) / Math.PI;
                 if(angle < .5){
                     m_launcher.setRotationSetpoint(.5);
                 }
