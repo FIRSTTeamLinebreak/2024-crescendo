@@ -1,12 +1,6 @@
 package frc.robot.commands;
 
-import static frc.robot.Util.applyCircularDeadZone;
-import static frc.robot.Util.applyLinearDeadZone;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.JoystickConstants;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
 
 public class MoveLauncherRotation extends Command {

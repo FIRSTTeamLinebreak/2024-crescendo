@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -8,7 +9,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import frc.robot.Constants.JoystickConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
@@ -20,18 +20,24 @@ public class SwerveDrive extends SubsystemBase {
     private final SwerveModule backLeft;
     private final SwerveModule backRight;
 
+    private final Odometry m_odometry;
+    private final Vision m_vision;
+    
     private final AHRS gyro;
     private final double gyroOffset = 270.0;
+    private double gyroOffsetInit;
 
     /** Initializes a new SwerveDrive subsystem object. */
-    public SwerveDrive() {
-        frontLeft =
+    public SwerveDrive(Vision m_vision) {
+        this.m_vision = m_vision;
+
+        this.frontLeft =
                 new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
-        frontRight =
+        this.frontRight =
                 new SwerveModule(31, false, 32, false, 33, SwerveConstants.Dimensions.magOffsetFR);
-        backLeft =
+        this.backLeft =
                 new SwerveModule(41, false, 42, false, 43, SwerveConstants.Dimensions.magOffsetBL);
-        backRight =
+        this.backRight =
                 new SwerveModule(51, false, 52, false, 53, SwerveConstants.Dimensions.magOffsetBR);
 
         frontRight.reset();
@@ -41,6 +47,16 @@ public class SwerveDrive extends SubsystemBase {
 
         gyro = new AHRS(SerialPort.Port.kMXP);
         this.InitGyro();
+        this.m_odometry = new Odometry(this, m_vision);
+    }
+
+    public void init() {
+        gyroOffsetInit = m_odometry.getRobotPose().getRotation().getDegrees();
+        gyro.setAngleAdjustment(gyroOffsetInit);
+    }
+
+    public Odometry getOdometry() {
+        return m_odometry;
     }
 
     /**
@@ -49,6 +65,7 @@ public class SwerveDrive extends SubsystemBase {
      * @return Robot heading in Rotation2d
      */ 
     public Rotation2d getRotation2d() {
+        if (gyro == null) return Rotation2d.fromDegrees(0);
         return gyro.getRotation2d();
     }
 
@@ -125,7 +142,6 @@ public class SwerveDrive extends SubsystemBase {
                             try {
                                 Thread.sleep(1000);
                                 gyro.reset();
-                                gyro.setAngleAdjustment(gyroOffset);
                             } catch (Exception e) {
                                 System.out.println("Init failure!");
                                 System.out.println(e);

@@ -124,8 +124,8 @@ public final class Constants {
         public static final double joystickDeadZone = 0.1;
         public static final double triggerDeadZone = 0.1;
 
-        public static final double xySpeedMultiplier = 4.25; // Speed multiplier in m/s(?)
-        public static final double turningSpeedMultiplier = 2.75; // Turning multiplier in m/s
+        public static final double xySpeedMultiplier = 4.25; // Speed multiplier in m/s
+        public static final double turningSpeedMultiplier = 2.75; // Turning multiplier in rads/s
         public static final double slowTurningDivisor = 2;
     }
 }

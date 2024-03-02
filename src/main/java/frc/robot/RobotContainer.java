@@ -57,9 +57,9 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        m_swerveDrive = new SwerveDrive();
         m_vision = new Vision();
-        m_odometry = new Odometry(m_swerveDrive, m_vision);
+        m_swerveDrive = new SwerveDrive(m_vision);
+        m_odometry = m_swerveDrive.getOdometry();
         m_led = new LED(0, 10);
         m_launcher = new Launcher(12, 13, 11, 14);
         m_elevator = new Elevator(6, 7);
@@ -71,18 +71,21 @@ public class RobotContainer {
         m_driveController = new CommandXboxController(JoystickConstants.driveControllerId);
         m_scoreController = new CommandXboxController(JoystickConstants.scoreControllerId);
         m_SwerveDriveCommand = new JoystickDriveCommand(m_swerveDrive,
-                () -> m_driveController.getLeftX() * -1, () -> m_driveController.getLeftY(), () -> {
+                () -> m_driveController.getLeftY(), () -> m_driveController.getLeftX(), () -> {
                     // Rotation
                     double angle = m_odometry.getRobotPose().getRotation().getRadians();
                     SmartDashboard.putNumber("angle", angle);
                     SmartDashboard.putNumber("triggeraxis", m_driveController.getHID().getRightTriggerAxis());
-                    if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 3) {
+                    if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 4) {
+                        SmartDashboard.putBoolean("speaker alignment", true);
                         return visionPID.calculate(angle, Math.tanh((m_odometry.getRobotPose().getY() - 8.308467) / (m_odometry.getRobotPose().getX() - 1.442593)));
                     }
                     else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 5) {
+                        SmartDashboard.putBoolean("amp alignment", true);
                         return visionPID.calculate(angle, 0);
                     }
                     else if (m_driveController.getHID().getRightTriggerAxis() > 0.5 && m_vision.lastTagSeen() == 11) {
+                        SmartDashboard.putBoolean("amp alignment", true);
                         return visionPID.calculate(angle, 0);
                     }
 
@@ -103,7 +106,7 @@ public class RobotContainer {
         });
 
         // Build an auto chooser. This will use Commands.none() as the default option.
-        autoChooser = AutoBuilder.buildAutoChooser("FirstAuto");
+        autoChooser = AutoBuilder.buildAutoChooser();
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
         System.out.println(SmartDashboard.getData("Auto Chooser"));
@@ -115,14 +118,14 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // m_launcher.enableRotationPID();
-        // m_elevator.enable();
-        PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
+        m_swerveDrive.init();
+        // PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
 
         // System.out.println("Auto command");
         // return AutoBuilder.followPath(path);
-        return new InstantCommand();
-        // return autoChooser.getSelected();
+        m_launcher.enableRotationPID();
+        m_elevator.enable();
+        return autoChooser.getSelected();
     }
 
     public void initTeleop() {
@@ -136,6 +139,9 @@ public class RobotContainer {
         // m_launcher.enableRotationPID();
         // m_elevator.enable();
         // m_launcher.setControlSpeed(0.05);
+
+        m_launcher.enableRotationPID();
+        m_elevator.enable();
 
         m_scoreController.povDown().onTrue(new InstantCommand(CommandScheduler.getInstance()::cancelAll));
 
@@ -264,6 +270,8 @@ public class RobotContainer {
     }
 
     public void initTest() {
+        m_swerveDrive.init();
+        
         m_scoreController.a().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.25)));
         m_scoreController.b().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.50)));
         m_scoreController.y().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.75)));

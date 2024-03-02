@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagDetection;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -14,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Vision extends SubsystemBase {
 
     private final NetworkTable table;
+    private final NetworkTableEntry ta;
     private final NetworkTableEntry tv;
     private final NetworkTableEntry tid;
     private final NetworkTableEntry tagPose;
@@ -24,6 +22,7 @@ public class Vision extends SubsystemBase {
 
     public Vision() {
         table = NetworkTableInstance.getDefault().getTable("limelight");
+        ta = table.getEntry("ta");
         tv = table.getEntry("tv");
         tid = table.getEntry("tid");
         tagPose = table.getEntry("targetpose_robotspace");
@@ -54,7 +53,7 @@ public class Vision extends SubsystemBase {
     }
 
     public Double[] getRobotPose() {
-        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0,0.0});
+        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0});
     }
 
     public double getVisionClawSetpoint() {
@@ -71,6 +70,23 @@ public class Vision extends SubsystemBase {
             lastTagSeen = getAprilTagID();
         }
         return lastTagSeen;
+    }
+
+    public Pose2d getVisionPose() {
+        Double[] botPose = this.getRobotPose();
+        return new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
+    }
+
+    public double getPoseLatensy() {
+        return this.getRobotPose()[6];
+    }
+
+    public int getNumberOfTargetsVisible() {
+        return this.getRobotPose()[7].intValue();
+    }
+
+    public double getBestTargetArea() {
+        return this.ta.getDouble(0.0);
     }
 }
 

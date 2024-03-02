@@ -1,12 +1,7 @@
 package frc.robot.commands;
 
-import static frc.robot.Util.applyCircularDeadZone;
-import static frc.robot.Util.applyLinearDeadZone;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.JoystickConstants;
 import frc.robot.subsystems.Elevator;
 
 public class MoveElevator extends Command {
