@@ -25,7 +25,6 @@ public class SwerveDrive extends SubsystemBase {
     
     private final AHRS gyro;
     private final double gyroOffset = 270.0;
-    private double gyroOffsetInit;
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive(Vision m_vision) {
@@ -45,14 +44,10 @@ public class SwerveDrive extends SubsystemBase {
         backRight.reset();
         backLeft.reset();
 
+        m_vision = new Vision();
         gyro = new AHRS(SerialPort.Port.kMXP);
         this.InitGyro();
         this.m_odometry = new Odometry(this, m_vision);
-    }
-
-    public void init() {
-        gyroOffsetInit = m_odometry.getRobotPose().getRotation().getDegrees();
-        gyro.setAngleAdjustment(gyroOffsetInit);
     }
 
     public Odometry getOdometry() {
@@ -65,6 +60,7 @@ public class SwerveDrive extends SubsystemBase {
      * @return Robot heading in Rotation2d
      */ 
     public Rotation2d getRotation2d() {
+        // if (m_odometry != null) return m_odometry.getRobotPose().getRotation();
         if (gyro == null) return Rotation2d.fromDegrees(0);
         return gyro.getRotation2d();
     }
@@ -142,6 +138,7 @@ public class SwerveDrive extends SubsystemBase {
                             try {
                                 Thread.sleep(1000);
                                 gyro.reset();
+                                gyro.setAngleAdjustment(gyroOffset);
                             } catch (Exception e) {
                                 System.out.println("Init failure!");
                                 System.out.println(e);

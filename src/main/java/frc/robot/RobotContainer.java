@@ -118,13 +118,12 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        m_swerveDrive.init();
         // PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
 
         // System.out.println("Auto command");
         // return AutoBuilder.followPath(path);
-        m_launcher.enableRotationPID();
-        m_elevator.enable();
+        // m_launcher.enableRotationPID();
+        // m_elevator.enable();
         return autoChooser.getSelected();
     }
 
@@ -270,8 +269,6 @@ public class RobotContainer {
     }
 
     public void initTest() {
-        m_swerveDrive.init();
-        
         m_scoreController.a().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.25)));
         m_scoreController.b().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.50)));
         m_scoreController.y().onTrue(new InstantCommand(() -> m_launcher.setRotationSetpoint(0.75)));
