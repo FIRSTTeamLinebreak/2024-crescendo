@@ -20,9 +20,6 @@ public class Elevator extends PIDSubsystem {
     private final double upperLimit = 100.0;
     private final double lowerLimit = 0.0;
 
-    // For Testing
-    private double speed = 0.0;
-
     public Elevator(int leftMotorID, int rightMotorID) {
         super(new PIDController(PID.Elevator.kP, PID.Elevator.kI, PID.Elevator.kD));
         this.getController().setTolerance(PID.Elevator.kT);

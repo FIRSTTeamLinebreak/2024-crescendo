@@ -28,7 +28,7 @@ public class Launcher extends SubsystemBase {
     private final DutyCycleEncoder rotationEncoder;
     private boolean rotationPIDEnabled = false;
 
-    private final double encoderOffest = 0.4;
+    private final double encoderOffest = 0.0;
 
     private double launcherSpeed = 0.0;
     private double controlSpeed = 0.0;
@@ -123,6 +123,7 @@ public class Launcher extends SubsystemBase {
 
         SmartDashboard.putNumber("Claw Rotation", getMeasurement());
         SmartDashboard.putNumber("Claw Setpoint", rotationSetpoint);
+        SmartDashboard.putNumber("encoderposition", rotationEncoder.get());
 
         if (rotationPIDEnabled) {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);

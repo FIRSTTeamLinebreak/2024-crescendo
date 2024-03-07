@@ -55,6 +55,7 @@ public class SwerveModule {
         turningController.restoreFactoryDefaults(true);
         turningController.setInverted(isTurningReversed);
         turningController.setIdleMode(IdleMode.kBrake);
+        turningController.setSmartCurrentLimit(40, 40);
 
         turningPid =
                 new PIDController(

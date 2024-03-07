@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
@@ -21,16 +22,14 @@ public class Odometry extends SubsystemBase {
     private final SwerveDrive m_driveSubsystem;
     private final Vision m_vision;
 
-    private final StructPublisher<Pose2d> m_poseOdoPublisher;
-    private final StructPublisher<Pose2d> m_poseVisPublisher;
+    private final StructPublisher<Pose2d> m_poseOdoPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("Pose_Odo", Pose2d.struct).publish();
+    private final StructPublisher<Pose2d> m_poseVisPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("Pose_Vis", Pose2d.struct).publish();
 
     public Odometry(SwerveDrive driveSubsystem, Vision vison) {
         m_driveSubsystem = driveSubsystem;
         m_vision = vison;
-        m_poseOdoPublisher = NetworkTableInstance.getDefault()
-                .getStructTopic("Pose_Odo", Pose2d.struct).publish();
-        m_poseVisPublisher = NetworkTableInstance.getDefault()
-                .getStructTopic("Pose_Vis", Pose2d.struct).publish();
 
         m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics.driveKinematics,
                 m_driveSubsystem.getRotation2d(),
@@ -38,7 +37,7 @@ public class Odometry extends SubsystemBase {
                 new Pose2d(2.0, 2.0, new Rotation2d()));
 
         AutoBuilder.configureHolonomic(
-                this::getRobotPose, // Needs to be updated to pose estimation
+                this::getRobotPose,
                 (Pose2d pose) -> m_poseEstimator.resetPosition(
                         m_driveSubsystem.getRotation2d(),
                         m_driveSubsystem.getModulePositions(),
@@ -57,12 +56,14 @@ public class Odometry extends SubsystemBase {
     }
 
     public Pose2d getRobotPose() {
-        return m_poseEstimator.getEstimatedPosition();
+        Pose2d pose = m_poseEstimator.getEstimatedPosition();
+        m_poseOdoPublisher.set(pose);
+        return pose;
     }
 
     public void updatePoseEstimatorWithVisionBotPose() {
         Pose2d visionPose = m_vision.getVisionPose();
-        double visionLatensy = m_vision.getPoseLatensy();
+        m_poseVisPublisher.set(visionPose);
         // invalid LL data
         if (visionPose.getX() == 0.0) {
             return;
@@ -71,26 +72,32 @@ public class Odometry extends SubsystemBase {
         // distance from current pose to vision estimated pose
         double poseDifference = m_poseEstimator.getEstimatedPosition().getTranslation()
                 .getDistance(visionPose.getTranslation());
+        int numberOfTargetsVisible = m_vision.getNumberOfTargetsVisible();
+        double bestTargetArea = m_vision.getBestTargetArea();
+        double visionLatensy = m_vision.getPoseLatensy();
+
+        SmartDashboard.putNumber("LL: Pose Difference", poseDifference);
+        SmartDashboard.putNumber("LL: Num Visable Targets", numberOfTargetsVisible);
+        SmartDashboard.putNumber("LL: Best Target Area", bestTargetArea);
+        SmartDashboard.putNumber("LL: latensy", visionLatensy);
 
         double xyStds = 0.75;
         double degStds = 9;
-        // multiple targets detected
-        if (m_vision.getNumberOfTargetsVisible() >= 2) {
+        if (numberOfTargetsVisible >= 2) {
+            // multiple targets detected
             xyStds = 0.5;
             degStds = 6;
-        }
-        // 1 target with large area and close to estimated pose
-        else if (m_vision.getBestTargetArea() > 0.8 && poseDifference < 0.5) {
+        } else if (bestTargetArea > 0.8 && poseDifference < 0.5) {
+            // 1 target with large area and close to estimated pose
             xyStds = 1.0;
             degStds = 12;
-        }
-        // 1 target farther away and estimated pose is close
-        else if (m_vision.getBestTargetArea() > 0.1 && poseDifference < 0.3) {
+        } else if (bestTargetArea > 0.1 && poseDifference < 0.3) {
+            // 1 target farther away and estimated pose is close
             xyStds = 2.0;
             degStds = 30;
-        } else {
-            return;
         }
+
+        SmartDashboard.putString("LL: Std Dev", "XY: " + xyStds + ", Deg: " + degStds);
 
         m_poseEstimator.setVisionMeasurementStdDevs(
                 VecBuilder.fill(xyStds, xyStds, Units.degreesToRadians(degStds)));
@@ -103,19 +110,8 @@ public class Odometry extends SubsystemBase {
         m_poseEstimator.update(
                 m_driveSubsystem.getRotation2d(),
                 m_driveSubsystem.getModulePositions());
-        
+
         updatePoseEstimatorWithVisionBotPose();
-
-        Double[] visionPoseArr = m_vision.getRobotPose();
-
-        Pose2d odometryPose = getRobotPose();
-        Pose2d visionPose = new Pose2d(
-                visionPoseArr[0],
-                visionPoseArr[1],
-                new Rotation2d(Units.degreesToRadians(visionPoseArr[5])));
-
-        m_poseOdoPublisher.set(odometryPose);
-        m_poseVisPublisher.set(visionPose);
     }
 
 }

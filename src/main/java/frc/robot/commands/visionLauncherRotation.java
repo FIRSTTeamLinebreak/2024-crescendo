@@ -1,24 +1,19 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
-import frc.robot.subsystems.StateMachine;
 import frc.robot.subsystems.Vision;
 public class visionLauncherRotation extends Command {
 
-    private final double minLauncherSetpoint = .85;
-    private final double maxLauncherSetpoint = .9;
+    // private final double minLauncherSetpoint = .85;
+    // private final double maxLauncherSetpoint = .9;
     private final Launcher m_launcher;
     private final Vision m_vision;
     private final Elevator m_elevator;
     private final LinearFilter filter;
-    // private final StateMachine stateMachine;
     private double measurement = 0;
-
-    private double setpoint;
 
     public visionLauncherRotation(Launcher m_launcher, Vision m_vision, Elevator m_elevator) {
         this.m_launcher = m_launcher;        
@@ -26,7 +21,6 @@ public class visionLauncherRotation extends Command {
         this.m_elevator = m_elevator;
 
         filter = LinearFilter.movingAverage(10);
-        // stateMachine = new StateMachine(Launcher m_launcher, Elevator m_elevator, Vision m_vision);
 
         addRequirements(m_launcher);
         addRequirements(m_vision);
@@ -34,9 +28,7 @@ public class visionLauncherRotation extends Command {
 
     /** Called once when the command is initially scheduled. */
     @Override
-    public void initialize() {
-        // if(stateMachine.getState())
-    }
+    public void initialize() {}
 
     /** Called repeatedly while the command is scheduled. */
     @Override

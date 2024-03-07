@@ -16,8 +16,6 @@ public class Vision extends SubsystemBase {
     private final NetworkTableEntry tid;
     private final NetworkTableEntry tagPose;
     private final NetworkTableEntry botPose;
-    private final double maxLauncherSetpoint = .88;
-    private final double minLauncherSetpoint = .77;
     private long lastTagSeen = -1;
 
     public Vision() {
@@ -40,25 +38,21 @@ public class Vision extends SubsystemBase {
 
     /** returns yaw */
     public double getTargetAngle() {
-        return tagPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0})[5];
+        return tagPose.getDoubleArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })[5];
     }
-    
+
     public boolean hasTargets() {
         return tv.getDouble(0.0) == 1.0;
     }
 
     public double getLengthToBase() {
-        double lengthToBase = tagPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0})[2];
+        double lengthToBase = tagPose.getDoubleArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })[2];
         return lengthToBase;
     }
 
     public Double[] getRobotPose() {
-        return botPose.getDoubleArray(new Double[]{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0});
-    }
-
-    public double getVisionClawSetpoint() {
-        double slope = (maxLauncherSetpoint - minLauncherSetpoint) / 1.6;
-        return (getLengthToBase() * slope) + minLauncherSetpoint;
+        return botPose.getDoubleArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
+        // return new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     }
 
     public long getAprilTagID() {
@@ -66,7 +60,7 @@ public class Vision extends SubsystemBase {
     }
 
     public long lastTagSeen() {
-        if(getAprilTagID() != -1) {
+        if (getAprilTagID() != -1) {
             lastTagSeen = getAprilTagID();
         }
         return lastTagSeen;
@@ -89,5 +83,3 @@ public class Vision extends SubsystemBase {
         return this.ta.getDouble(0.0);
     }
 }
-
-

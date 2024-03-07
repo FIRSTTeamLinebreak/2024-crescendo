@@ -15,21 +15,20 @@ import frc.robot.Constants.SwerveConstants.Kinematics;
 
 /** The subsystem that handles swerve drive. */
 public class SwerveDrive extends SubsystemBase {
+
     private final SwerveModule frontLeft;
     private final SwerveModule frontRight;
     private final SwerveModule backLeft;
     private final SwerveModule backRight;
 
     private final Odometry m_odometry;
-    private final Vision m_vision;
     
     private final AHRS gyro;
-    private final double gyroOffset = 270.0;
+    private final double gyroOffset = 0.0;
+
 
     /** Initializes a new SwerveDrive subsystem object. */
     public SwerveDrive(Vision m_vision) {
-        this.m_vision = m_vision;
-
         this.frontLeft =
                 new SwerveModule(21, false, 22, false, 23, SwerveConstants.Dimensions.magOffsetFL);
         this.frontRight =
