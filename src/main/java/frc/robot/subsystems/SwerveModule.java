@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -13,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import frc.robot.Constants.SwerveConstants;
 
 /** An individual swerve module. */
@@ -50,12 +50,13 @@ public class SwerveModule {
             double coderOffset) {
         driveController = new TalonFX(driveId);
         driveController.setInverted(isDriveReversed);
+        driveController.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(50).withStatorCurrentLimitEnable(true));
 
         turningController = new CANSparkMax(turningId, MotorType.kBrushless);
         turningController.restoreFactoryDefaults(true);
         turningController.setInverted(isTurningReversed);
         turningController.setIdleMode(IdleMode.kBrake);
-        turningController.setSmartCurrentLimit(40, 40);
+        turningController.setSmartCurrentLimit(40);
 
         turningPid =
                 new PIDController(

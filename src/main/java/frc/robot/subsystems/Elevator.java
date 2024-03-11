@@ -33,6 +33,9 @@ public class Elevator extends PIDSubsystem {
         leftMotor.setIdleMode(IdleMode.kBrake);
         rightMotor.setIdleMode(IdleMode.kBrake);
 
+        leftMotor.setSmartCurrentLimit(30);
+        rightMotor.setSmartCurrentLimit(30);
+
         this.setSetpoint(getMeasurement());
     }
 
