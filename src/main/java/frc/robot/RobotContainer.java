@@ -176,7 +176,7 @@ public class RobotContainer {
                 })
                         .andThen(
                                 (m_elevator.moveToSetpoint(50)
-                                        .alongWith(m_launcher.moveClawToSetpoint(0.5))
+                                        .alongWith(m_launcher.moveClawToSetpoint(0.5).withTimeout(1))
                                         .andThen(m_launcher.moveClawToSetpoint(0.042))
                                         .andThen(m_elevator.moveToSetpoint(37))).alongWith(new InstantCommand(() -> {
                                             m_launcher.setLauncherSpeed(0.37);
