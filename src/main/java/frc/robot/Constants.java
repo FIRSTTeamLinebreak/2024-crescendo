@@ -26,13 +26,13 @@ public final class Constants {
             public static final double wheelDiameter = Units.inchesToMeters(4.0);
             public static final double wheelCircumference = wheelDiameter * PI;
 
-            public static final double wheelBase = Units.inchesToMeters(23.5);
-            public static final double trackWidth = Units.inchesToMeters(21.5);
+            public static final double wheelBase = Units.inchesToMeters(21.5);
+            public static final double trackWidth = Units.inchesToMeters(23.5);
 
-            public static final double magOffsetFL = 0.142;
-            public static final double magOffsetFR = 0.970;
-            public static final double magOffsetBL = 0.465;
-            public static final double magOffsetBR = 0.638;
+            public static final double magOffsetFL = 0.149;
+            public static final double magOffsetFR = 0.966;
+            public static final double magOffsetBL = 0.466;
+            public static final double magOffsetBR = 0.642;
         }
 
         public static final class Kinematics {
@@ -58,11 +58,11 @@ public final class Constants {
 
         public static final class PID {
             public static final class ModuleAngle {
-                public static final double kP = 0.7;
+                public static final double kP = 1.5;
                 public static final double kI = 0.0;
-                public static final double kD = 0.001;
+                public static final double kD = 0.005;
 
-                public static final double kT = 0.001;
+                public static final double kT = 0.0005;
             }
 
             public static final class ClawRotation {
@@ -124,7 +124,7 @@ public final class Constants {
         public static final double joystickDeadZone = 0.1;
         public static final double triggerDeadZone = 0.1;
 
-        public static final double xySpeedMultiplier = 4.25; // Speed multiplier in m/s
+        public static final double xySpeedMultiplier = 2.25; // Speed multiplier in m/s
         public static final double turningSpeedMultiplier = 2.75; // Turning multiplier in rads/s
         public static final double slowTurningDivisor = 2;
     }

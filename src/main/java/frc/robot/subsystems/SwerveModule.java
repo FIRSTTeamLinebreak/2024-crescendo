@@ -129,6 +129,7 @@ public class SwerveModule {
      * @return Turning motor position
      */
     public double getTurningPosition() {
+        SmartDashboard.putNumber("" + this.canCoder.getDeviceID(), canCoder.getPosition().getValueAsDouble());
         return canCoder.getPosition().getValueAsDouble() - canCoderOffset;
     }
 
