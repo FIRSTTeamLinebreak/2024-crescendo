@@ -18,137 +18,140 @@ import frc.robot.Constants.SwerveConstants;
 
 /** An individual swerve module. */
 public class SwerveModule {
-    // Drive
-    private final TalonFX driveController;
+        // Drive
+        private final TalonFX driveController;
 
-    // Turning
-    private final CANSparkMax turningController;
-    private final PIDController turningPid;
+        // Turning
+        private final CANSparkMax turningController;
+        private final PIDController turningPid;
 
-    // CAN Coder
-    private final CANcoder canCoder;
-    private final double canCoderOffset;
+        // CAN Coder
+        private final CANcoder canCoder;
+        private final double canCoderOffset;
 
-    private SwerveModuleState state;
+        private SwerveModuleState state;
 
-    /**
-     * Creates a new swerve module.
-     *
-     * @param driveId CAN ID for the drive motor (Falcon)
-     * @param isDriveReversed If the drive motor is reversed
-     * @param turningId CAN ID for the turning motor (NEO)
-     * @param isTurningReversed If the turning motor is reversed
-     * @param coderId CAN ID for the CAN coder within the swerve module
-     * @param coderOffset The offset to get the CAN coder to true zero (NEED TO BE POSITIVE)
-     */
-    public SwerveModule(
-            int driveId,
-            boolean isDriveReversed,
-            int turningId,
-            boolean isTurningReversed,
-            int coderId,
-            double coderOffset) {
-        driveController = new TalonFX(driveId);
-        driveController.setInverted(isDriveReversed);
-        driveController.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(50).withStatorCurrentLimitEnable(true));
+        /**
+         * Creates a new swerve module.
+         *
+         * @param driveId           CAN ID for the drive motor (Falcon)
+         * @param isDriveReversed   If the drive motor is reversed
+         * @param turningId         CAN ID for the turning motor (NEO)
+         * @param isTurningReversed If the turning motor is reversed
+         * @param coderId           CAN ID for the CAN coder within the swerve module
+         * @param coderOffset       The offset to get the CAN coder to true zero (NEED
+         *                          TO BE POSITIVE)
+         */
+        public SwerveModule(
+                        int driveId,
+                        boolean isDriveReversed,
+                        int turningId,
+                        boolean isTurningReversed,
+                        int coderId,
+                        double coderOffset) {
+                driveController = new TalonFX(driveId);
+                driveController.setInverted(isDriveReversed);
+                driveController.getConfigurator().apply(new CurrentLimitsConfigs()
+                                .withStatorCurrentLimit(50)
+                                .withStatorCurrentLimitEnable(true));
 
-        turningController = new CANSparkMax(turningId, MotorType.kBrushless);
-        turningController.restoreFactoryDefaults(true);
-        turningController.setInverted(isTurningReversed);
-        turningController.setIdleMode(IdleMode.kBrake);
-        turningController.setSmartCurrentLimit(40);
+                turningController = new CANSparkMax(turningId, MotorType.kBrushless);
+                turningController.restoreFactoryDefaults(true);
+                turningController.setInverted(isTurningReversed);
+                turningController.setIdleMode(IdleMode.kBrake);
+                turningController.setSmartCurrentLimit(40);
 
-        turningPid =
-                new PIDController(
-                        SwerveConstants.PID.ModuleAngle.kP,
-                        SwerveConstants.PID.ModuleAngle.kI,
-                        SwerveConstants.PID.ModuleAngle.kD);
-        turningPid.enableContinuousInput(0.0, 1.0);
-        turningPid.setTolerance(SwerveConstants.PID.ModuleAngle.kT);
+                turningPid = new PIDController(
+                                SwerveConstants.PID.ModuleAngle.kP,
+                                SwerveConstants.PID.ModuleAngle.kI,
+                                SwerveConstants.PID.ModuleAngle.kD);
+                turningPid.enableContinuousInput(0.0, 1.0);
+                turningPid.setTolerance(SwerveConstants.PID.ModuleAngle.kT);
 
-        canCoder = new CANcoder(coderId);
+                canCoder = new CANcoder(coderId);
 
-        CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        canCoder.getConfigurator().apply(config);
+                CANcoderConfiguration config = new CANcoderConfiguration();
+                config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+                canCoder.getConfigurator().apply(config);
 
-        this.canCoderOffset = coderOffset;
-    }
-
-    /**
-     * Sets the swerve module to a new state.
-     *
-     * @param state The new desired state
-     * @param log If the Swerve Module should log there target state and current state
-     */
-    public void setState(SwerveModuleState state, boolean log) {
-        if (log) {
-            SmartDashboard.putString(
-                    "Swerve "
-                            + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
-                            + " Target State",
-                    String.format(
-                            "Speed: %.3f, Rotation: %.3f",
-                            state.speedMetersPerSecond, state.angle.getRadians()));
-            SmartDashboard.putNumber(
-                    "Swerve "
-                            + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
-                            + " Current Rotation",
-                    getTurningPosition());
+                this.canCoderOffset = coderOffset;
         }
 
-        // Optimize movements to not move more than 90 deg for any new state
-        this.state =
-                SwerveModuleState.optimize(
-                        state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
-        driveController.set(
-                this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed);
-        turningController.set(
-                turningPid.calculate(
-                        getTurningPosition(), this.state.angle.getRadians() / (2 * Math.PI)));
-    }
+        /**
+         * Sets the swerve module to a new state.
+         *
+         * @param state The new desired state
+         * @param log   If the Swerve Module should log there target state and current
+         *              state
+         */
+        public void setState(SwerveModuleState state, boolean log) {
+                if (log) {
+                        SmartDashboard.putString(
+                                        "Swerve "
+                                                        + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
+                                                        + " Target State",
+                                        String.format(
+                                                        "Speed: %.3f, Rotation: %.3f",
+                                                        state.speedMetersPerSecond, state.angle.getRadians()));
+                        SmartDashboard.putNumber(
+                                        "Swerve "
+                                                        + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
+                                                        + " Current Rotation",
+                                        getTurningPosition());
+                }
 
-    public SwerveModuleState getState() {
-        if (state != null) return state;
-        return new SwerveModuleState();
-    }
+                // Optimize movements to not move more than 90 deg for any new state
+                this.state = SwerveModuleState.optimize(
+                                state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
+                driveController.set(
+                                this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed);
+                turningController.set(
+                                turningPid.calculate(
+                                                getTurningPosition(), this.state.angle.getRadians() / (2 * Math.PI)));
+        }
 
-    /** Stops the swerve module. */
-    public void stop() {
-        driveController.set(0);
-        turningController.set(0);
-    }
+        public SwerveModuleState getState() {
+                if (state != null)
+                        return state;
+                return new SwerveModuleState();
+        }
 
-    public void reset() {
-        driveController.setPosition(0.0);
-        turningController.getEncoder().setPosition(0.0);
-    }
+        /** Stops the swerve module. */
+        public void stop() {
+                driveController.set(0);
+                turningController.set(0);
+        }
 
-    /**
-     * Gets the turning motor position in radians.
-     *
-     * @return Turning motor position
-     */
-    public double getTurningPosition() {
-        SmartDashboard.putNumber("" + this.canCoder.getDeviceID(), canCoder.getPosition().getValueAsDouble());
-        return canCoder.getPosition().getValueAsDouble() - canCoderOffset;
-    }
+        public void reset() {
+                driveController.setPosition(0.0);
+                turningController.getEncoder().setPosition(0.0);
+        }
 
-    /**
-     * Gets the turning motor position in radians in a human readable form.
-     *
-     * @return Turning motor position
-     */
-    public double getTurningPositionReadable() {
-        return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1)
-                * 2
-                * Math.PI;
-    }
+        /**
+         * Gets the turning motor position in radians.
+         *
+         * @return Turning motor position
+         */
+        public double getTurningPosition() {
+                SmartDashboard.putNumber("" + this.canCoder.getDeviceID(), canCoder.getPosition().getValueAsDouble());
+                return canCoder.getPosition().getValueAsDouble() - canCoderOffset;
+        }
 
-    public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(
-                driveController.getPosition().getValueAsDouble()
-                        * SwerveConstants.Kinematics.driveRotToMeters,
-                new Rotation2d(getTurningPosition() * 2 * Math.PI));
-    }
+        /**
+         * Gets the turning motor position in radians in a human readable form.
+         *
+         * @return Turning motor position
+         */
+        public double getTurningPositionReadable() {
+                return Math.abs((canCoder.getPosition().getValueAsDouble() - canCoderOffset) % 1)
+                                * 2
+                                * Math.PI;
+        }
+
+        public SwerveModulePosition getPosition() {
+                return new SwerveModulePosition(
+                                driveController.getPosition().getValueAsDouble()
+                                                * SwerveConstants.Kinematics.driveRotToMeters,
+                                new Rotation2d(getTurningPosition() * 2 * Math.PI));
+        }
 }
