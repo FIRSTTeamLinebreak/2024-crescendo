@@ -115,10 +115,10 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         // m_launcher.enableRotationPID();
-        // m_elevator.enable();
-        // return autoChooser.getSelected();
+        m_elevator.enable();
+        return autoChooser.getSelected();
         // return new JoystickDriveCommand(m_swerveDrive, () -> -0.25, () -> 0.0, () -> 0.0, () -> true).withTimeout(0.25);
-        return new InstantCommand();
+        // return new InstantCommand();
     }
 
     public void initTeleop() {
@@ -130,7 +130,7 @@ public class RobotContainer {
         m_elevator.setPoint(m_elevator.getMeasurement());
 
         // m_launcher.enableRotationPID();
-        // m_elevator.enable();
+        m_elevator.enable();
 
         m_scoreController.povDown().onTrue(new InstantCommand(scheduler::cancelAll));
 
