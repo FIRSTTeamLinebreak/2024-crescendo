@@ -42,7 +42,7 @@ public class Vision extends SubsystemBase {
     }
 
     public boolean hasTargets() {
-        return tv.getDouble(0.0) == 1.0;
+        return tv.getDouble(0.0) > 0.0;
     }
 
     public double getLengthToBase() {

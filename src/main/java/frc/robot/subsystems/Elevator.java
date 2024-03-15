@@ -23,13 +23,13 @@ public class Elevator extends PIDSubsystem {
     public Elevator(int leftMotorID, int rightMotorID) {
         super(new PIDController(PID.Elevator.kP, PID.Elevator.kI, PID.Elevator.kD));
         this.getController().setTolerance(PID.Elevator.kT);
-        
+
         leftMotor = new CANSparkMax(leftMotorID, MotorType.kBrushless);
         rightMotor = new CANSparkMax(rightMotorID, MotorType.kBrushless);
 
         leftMotor.restoreFactoryDefaults();
         rightMotor.restoreFactoryDefaults();
-        
+
         leftMotor.setIdleMode(IdleMode.kBrake);
         rightMotor.setIdleMode(IdleMode.kBrake);
 
@@ -67,12 +67,14 @@ public class Elevator extends PIDSubsystem {
         return leftMotor.getEncoder().getPosition() * -1;
     }
 
-    public boolean atPoint() {
-        if(this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= this.getSetpoint() && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= this.getSetpoint()) {
+    public boolean atPoint(double target) {
+        if (this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= target
+                && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= target) {
             return true;
         }
         return false;
     }
+
     /** Run approx. every 20 ms. */
     @Override
     public void periodic() {

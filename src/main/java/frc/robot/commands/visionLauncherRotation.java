@@ -1,88 +1,88 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
 import frc.robot.subsystems.Vision;
+
 public class visionLauncherRotation extends Command {
 
     // private final double minLauncherSetpoint = .85;
     // private final double maxLauncherSetpoint = .9;
     private final Launcher m_launcher;
-    private final Vision m_vision;
     private final Elevator m_elevator;
+    private final Vision m_vision;
     private final LinearFilter filter;
-    private double measurement = 0;
+    private double lastTagSeen = 0.0;
 
     public visionLauncherRotation(Launcher m_launcher, Vision m_vision, Elevator m_elevator) {
-        this.m_launcher = m_launcher;        
-        this.m_vision = m_vision;
+        this.m_launcher = m_launcher;
         this.m_elevator = m_elevator;
+        this.m_vision = m_vision;
 
         filter = LinearFilter.movingAverage(10);
 
-        addRequirements(m_launcher);
-        addRequirements(m_vision);
+        addRequirements(m_launcher, m_elevator, m_vision);
     }
 
     /** Called once when the command is initially scheduled. */
     @Override
-    public void initialize() {}
+    public void initialize() {
+        this.lastTagSeen = m_vision.lastTagSeen();
+    }
 
     /** Called repeatedly while the command is scheduled. */
     @Override
     public void execute() {
-        // if(m_vision.getAprilTagID() != -1) {
-        //     measurement = filter.calculate(m_vision.getLengthToBase());
-        //     double slope = Math.sqrt((2 * 9.81 * (measurement + 1.2))) * -1;
-        //     double slope = ((minLauncherSetpoint - maxLauncherSetpoint) / (2.8 - 1.2));
-        //     m_launcher.setRotationSetpoint(.17 + (maxLauncherSetpoint + (measurement + 1.2) * slope));
-        //     m_launcher.setRotationSetpoint(maxLauncherSetpoint + (maxLauncherSetpoint * slope));
-        // }
-        if(m_vision.lastTagSeen() == 3 || m_vision.lastTagSeen() == 4) {
-            if(m_vision.getAprilTagID() != -1) {
-                measurement = filter.calculate(m_vision.getLengthToBase());
-                // double X = Math.tanh(1.076325 / (measurement - .1778)) * 57.3248;
-                // double Y = (((99.048 - (3.3042 * X) + (.0713 * X * X) - (.00035 * X * X * X)) * .0174444) / Math.PI) + .5;
-                double angle = (Math.tanh(1.73 / (measurement - .51)) + (Math.PI / 2)) / Math.PI;
-                if(angle < .5){
-                    m_launcher.setRotationSetpoint(.5);
-                }
-                else if(angle > 1.0) {
-                    m_launcher.setRotationSetpoint(.95);
-                }
-                else {
-                    m_launcher.setRotationSetpoint(angle);
-                }
-            }
+        if (((lastTagSeen == 3 || lastTagSeen == 4) // Red Speaker
+                || (lastTagSeen == 7 || lastTagSeen == 8)) // Blue Speaker
+                && m_vision.hasTargets()) {
+            double measurement = filter.calculate(m_vision.getLengthToBase());
+            double angle = (Math.tanh(1.71 / (measurement - .31)) + (Math.PI / 2)) / Math.PI;
+
+            m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));
         }
 
-        // amp
-        else if(m_vision.lastTagSeen() == 5 || m_vision.lastTagSeen() == 6) {
-            m_elevator.moveToSetpoint(100)
-            .alongWith(m_launcher.moveClawToSetpoint(0.27)).schedule();
+        else if (((lastTagSeen == 5) // Red Amp
+                || (lastTagSeen == 6)) // Blue Amp
+        ) {
+            m_elevator.setPoint(100);
+            m_launcher.setRotationSetpoint(0.27);
         }
 
-        // trap
-        else if(m_vision.lastTagSeen() == 11 || m_vision.lastTagSeen() == 12 || m_vision.lastTagSeen() == 13 || m_vision.lastTagSeen() == 14 || m_vision.lastTagSeen() == 15 || m_vision.lastTagSeen() == 16) {
-            m_elevator.moveToSetpoint(48)
-            .andThen(m_launcher.moveClawToSetpoint(.905)).schedule();
+        else if ((lastTagSeen == 11 || lastTagSeen == 12 || lastTagSeen == 13) // Red Trap
+                || (lastTagSeen == 14 || lastTagSeen == 15 || lastTagSeen == 16) // Blue Trap
+        ) {
+            m_elevator.setPoint(48);
+            m_launcher.setRotationSetpoint(.905);
         }
     }
 
     /**
-     * Called when either the command finishes normally, or when it interrupted/canceled. Do not
-     * schedule commands here that share requirements with this command. Use andThen(Command)
+     * Called when either the command finishes normally, or when it
+     * interrupted/canceled. Do not
+     * schedule commands here that share requirements with this command. Use
+     * andThen(Command)
      * instead.
      *
      * @param interrupted Weather this command was interrupted
      */
     @Override
-    public void end(boolean interrupted) {}
+    public void end(boolean interrupted) {
+        // Returning from Speaker
+        if(lastTagSeen == 3 || lastTagSeen == 4 || lastTagSeen == 7 || lastTagSeen == 8) {
+            m_launcher.setRotationSetpoint(1.0);
+            return;
+        }
+        m_launcher.setRotationSetpoint(1.0);
+        m_elevator.setPoint(10);
+    }
 
     /**
-     * Whether the command has finished. If true, calls end() and stops the command from executing
+     * Whether the command has finished. If true, calls end() and stops the command
+     * from executing
      *
      * @return boolean
      */

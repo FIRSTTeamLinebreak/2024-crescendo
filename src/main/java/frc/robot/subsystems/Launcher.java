@@ -18,7 +18,6 @@ import frc.robot.Constants.SwerveConstants.PID;
  *
  * Might be best the change the way that the delay works currently */
 public class Launcher extends SubsystemBase {
-
     private final CANSparkMax flyWheelLeader;
     private final CANSparkMax flyWheelFollower;
     private final CANSparkMax controlWheels;
@@ -28,7 +27,7 @@ public class Launcher extends SubsystemBase {
     private final DutyCycleEncoder rotationEncoder;
     private boolean rotationPIDEnabled = false;
 
-    private final double encoderOffest = 0.0;
+    private final double encoderOffest = 0.766;
 
     private double launcherSpeed = 0.0;
     private double controlSpeed = 0.0;
@@ -78,20 +77,19 @@ public class Launcher extends SubsystemBase {
     }
 
     public double getMeasurement() {
-        // .56 to .88 1.4 rotations
-        // -0.44 to 0.88
         double measurement = rotationEncoder.get();
+        SmartDashboard.putNumber("Claw Raw Encoder", measurement);
         return 1 - (measurement - encoderOffest) * 2;
     }
 
     public void setRotationSetpoint(double setpoint) {
         if (setpoint > upperLimit) {
-                rotationSetpoint = upperLimit;
-                return;
-            } else if (setpoint < lowerLimit) {
-                rotationSetpoint = lowerLimit;
-                return;
-            }
+            rotationSetpoint = upperLimit;
+            return;
+        } else if (setpoint < lowerLimit) {
+            rotationSetpoint = lowerLimit;
+            return;
+        }
         rotationSetpoint = setpoint;
     }
 
@@ -99,8 +97,9 @@ public class Launcher extends SubsystemBase {
         return rotationPID.atSetpoint();
     }
 
-    public boolean atPoint() {
-        if(this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= rotationSetpoint && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= rotationSetpoint) {
+    public boolean atPoint(double target) {
+        if (this.getMeasurement() + Constants.SwerveConstants.PID.Elevator.kT >= target
+                && this.getMeasurement() - Constants.SwerveConstants.PID.Elevator.kT <= target) {
             return true;
         }
         return false;
@@ -129,14 +128,30 @@ public class Launcher extends SubsystemBase {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
             double clampedSpeed = MathUtil.clamp(calculatedSpeed, -0.5, 0.5);
             double feedForward = Math.abs(Math.sin(getMeasurement() * Math.PI) * PID.ClawRotation.kFF);
+            if (this.getMeasurement() > 1.0 && (calculatedSpeed + feedForward) > 1.0) {
+                return;
+            }
             launcherRotation.set(clampedSpeed + feedForward);
-            // launcherRotation.set(feedForward);
         } else {
             launcherRotation.set(0.0);
         }
     }
 
     public Command moveClawToSetpoint(double setpoint) {
-        return new InstantCommand(() -> this.setRotationSetpoint(setpoint)).repeatedly().until(this::rotationAtSetpoint);
+        return new InstantCommand(() -> this.setRotationSetpoint(setpoint)).repeatedly()
+                .until(this::rotationAtSetpoint);
+    }
+
+    public Command launchCommand() {
+        return new InstantCommand(() -> {
+            this.setLauncherSpeed(-1.0);
+        }).repeatedly().withTimeout(0.5)
+                .andThen(new InstantCommand(() -> {
+                    this.setControlSpeed(-1.0);
+                })).repeatedly().withTimeout(1.0)
+                .andThen(new InstantCommand(() -> {
+                    this.setControlSpeed(0.0);
+                    this.setLauncherSpeed(0.0);
+                }));
     }
 }

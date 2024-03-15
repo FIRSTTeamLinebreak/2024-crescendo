@@ -92,6 +92,23 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("AutoNoteLaunch",
                 new AutoNoteLaunch(m_swerveDrive, m_elevator, m_launcher, m_vision));
+        NamedCommands.registerCommand("StartAutoIntake", (m_elevator.moveToSetpoint(50)
+                .alongWith(m_launcher.moveClawToSetpoint(0.5).withTimeout(1))
+                .andThen(m_launcher.moveClawToSetpoint(0.07))
+                .andThen(m_elevator.moveToSetpoint(37))).alongWith(new InstantCommand(() -> {
+                    m_launcher.setLauncherSpeed(0.37);
+                    m_launcher.setControlSpeed(0.1);
+                    m_intake.setSpeed(0.45);
+                })));
+        NamedCommands.registerCommand("AutoStow", m_elevator.moveToSetpoint(50)
+                .andThen(m_launcher.moveClawToSetpoint(1.0)
+                        .alongWith(m_elevator.moveToSetpoint(10)))
+                .alongWith(
+                        new InstantCommand(() -> {
+                            m_launcher.setLauncherSpeed(0.0);
+                            m_launcher.setControlSpeed(-0.01);
+                            m_intake.setSpeed(0.0);
+                        })));
 
         PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
             SmartDashboard.putString("PP Cur Pos", pose.toString());
@@ -114,10 +131,11 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // m_launcher.enableRotationPID();
+        m_launcher.enableRotationPID();
         m_elevator.enable();
         return autoChooser.getSelected();
-        // return new JoystickDriveCommand(m_swerveDrive, () -> -0.25, () -> 0.0, () -> 0.0, () -> true).withTimeout(0.25);
+        // return new JoystickDriveCommand(m_swerveDrive, () -> -0.25, () -> 0.0, () ->
+        // 0.0, () -> true).withTimeout(0.25);
         // return new InstantCommand();
     }
 
@@ -129,74 +147,29 @@ public class RobotContainer {
         m_launcher.setRotationSetpoint(m_launcher.getMeasurement());
         m_elevator.setPoint(m_elevator.getMeasurement());
 
-        // m_launcher.enableRotationPID();
+        m_launcher.enableRotationPID();
         m_elevator.enable();
 
         m_scoreController.povDown().onTrue(new InstantCommand(scheduler::cancelAll));
 
-        Command cancelIntakeCommand = new InstantCommand(() -> {
-            m_launcher.setLauncherSpeed(0.0);
-            m_launcher.setControlSpeed(0.05);
-            m_intake.setSpeed(0.0);
-        });
-
-        // Launch motors - hold for on and off
-        m_scoreController.b().onTrue(
-                new InstantCommand(() -> {
-                    m_launcher.setLauncherSpeed(-1.0);
-                })
-                        .repeatedly()
-                        .withTimeout(0.5)
-                        .andThen(new InstantCommand(() -> {
-                            m_launcher.setControlSpeed(-1.0);
-                        }))
-                        .repeatedly()
-                        .withTimeout(1.0)
-                        .andThen(new InstantCommand(() -> {
-                            m_launcher.setControlSpeed(0.0);
-                            m_launcher.setLauncherSpeed(0.0);
-                        })));
-
-        // m_scoreControllrfeffefef0er.a().onTrue(
-        // new InstantCommand(() -> {
-        // m_launcher.setLauncherSpeed(0.37);
-        // m_launcher.setControlSpeed(0.1);
-        // m_intake.setSpeed(0.45);
-        // }));
-
-        // .905
-        // .893
+        m_scoreController.b().onTrue(m_launcher.launchCommand());
 
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
                 new InstantCommand(() -> {
-                    if (!(m_elevator.atPoint() && m_launcher.atPoint())) {
+                    if (!(m_elevator.atPoint(10) && m_launcher.atPoint(1.0))) {
                         new InstantCommand(scheduler::cancelAll);
                     }
                 })
                         .andThen(
                                 (m_elevator.moveToSetpoint(50)
-                                        .alongWith(m_launcher.moveClawToSetpoint(0.5).withTimeout(1))
-                                        .andThen(m_launcher.moveClawToSetpoint(0.042))
+                                        .alongWith(m_launcher.moveClawToSetpoint(0.65))
+                                        .andThen(m_launcher.moveClawToSetpoint(0.07))
                                         .andThen(m_elevator.moveToSetpoint(37))).alongWith(new InstantCommand(() -> {
                                             m_launcher.setLauncherSpeed(0.37);
                                             m_launcher.setControlSpeed(0.1);
                                             m_intake.setSpeed(0.45);
                                         }))));
-
-        // Amp Command
-        // m_scoreController.povUp().onTrue(
-        //         new InstantCommand(() -> {
-        //             if (!(m_elevator.atPoint() && m_launcher.atPoint())) {
-        //                 SmartDashboard.putBoolean("cancelled", true);
-        //                 new InstantCommand(CommandScheduler.getInstance()::cancelAll);
-        //             }
-        //         })
-        //                 .andThen(
-        //                         (m_launcher.moveClawToSetpoint(0.50)
-        //                                 .alongWith(m_elevator.moveToSetpoint(50))
-        //                                 .andThen(m_elevator.moveToSetpoint(100)
-        //                                         .alongWith(m_launcher.moveClawToSetpoint(0.27))))));
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
@@ -205,7 +178,7 @@ public class RobotContainer {
         // Trap
         m_scoreController.povRight().onTrue(
                 new InstantCommand(() -> {
-                    if (!(m_elevator.atPoint() && m_launcher.atPoint())) {
+                    if (!(m_elevator.atPoint(10) && m_launcher.atPoint(1.0))) {
                         new InstantCommand(scheduler::cancelAll);
                     }
                 })
@@ -216,7 +189,7 @@ public class RobotContainer {
         // stow
         m_scoreController.leftBumper().onTrue(
                 new InstantCommand(() -> {
-                    if (m_elevator.atPoint() && m_launcher.atPoint()) {
+                    if (m_elevator.atPoint(10) && m_launcher.atPoint(1.0)) {
                         new InstantCommand(scheduler::cancelAll);
                     }
                 })
@@ -225,7 +198,11 @@ public class RobotContainer {
                                         .andThen(m_launcher.moveClawToSetpoint(1.0)
                                                 .alongWith(m_elevator.moveToSetpoint(10)))
                                         .alongWith(
-                                                cancelIntakeCommand)));
+                                                new InstantCommand(() -> {
+                                                    m_launcher.setLauncherSpeed(0.0);
+                                                    m_launcher.setControlSpeed(0.05);
+                                                    m_intake.setSpeed(0.0);
+                                                }))));
 
         m_scoreController.povUp().onTrue(m_elevator.moveToSetpoint(100));
 

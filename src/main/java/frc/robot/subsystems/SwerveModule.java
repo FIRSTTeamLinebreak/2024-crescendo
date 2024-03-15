@@ -84,25 +84,10 @@ public class SwerveModule {
          * @param log   If the Swerve Module should log there target state and current
          *              state
          */
-        public void setState(SwerveModuleState state, boolean log) {
-                if (log) {
-                        SmartDashboard.putString(
-                                        "Swerve "
-                                                        + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
-                                                        + " Target State",
-                                        String.format(
-                                                        "Speed: %.3f, Rotation: %.3f",
-                                                        state.speedMetersPerSecond, state.angle.getRadians()));
-                        SmartDashboard.putNumber(
-                                        "Swerve "
-                                                        + Integer.toString(driveController.getDeviceID() - 10).charAt(0)
-                                                        + " Current Rotation",
-                                        getTurningPosition());
-                }
-
-                // Optimize movements to not move more than 90 deg for any new state
+        public void setState(SwerveModuleState state) {
                 this.state = SwerveModuleState.optimize(
                                 state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
+                
                 driveController.set(
                                 this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed);
                 turningController.set(

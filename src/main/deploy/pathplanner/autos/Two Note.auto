@@ -1,0 +1,55 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.5400987417658519,
+      "y": 2.1661895982059276
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Launch Preload"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoNoteLaunch"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartAutoIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Note 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoStow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoNoteLaunch"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
