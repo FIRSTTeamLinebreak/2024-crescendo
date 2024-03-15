@@ -10,11 +10,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
+import frc.robot.LimelightHelpers.PoseEstimate;
 
 public class Odometry extends SubsystemBase {
 
@@ -61,48 +61,50 @@ public class Odometry extends SubsystemBase {
         return pose;
     }
 
+    /**
+     * Get the Robots alliance color
+     * @return true if red alliance, false if blue alliance
+     */
+    public boolean getAlliance() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+    }
+
     public void updatePoseEstimatorWithVisionBotPose() {
-        Pose2d visionPose = m_vision.getVisionPose();
-        m_poseVisPublisher.set(visionPose);
+        PoseEstimate visionPose = m_vision.getRobotPose();
+        m_poseVisPublisher.set(visionPose.pose);
         // invalid LL data
-        if (visionPose.getX() == 0.0) {
+        if (visionPose.pose.getX() == 0.0) {
             return;
         }
 
         // distance from current pose to vision estimated pose
         double poseDifference = m_poseEstimator.getEstimatedPosition().getTranslation()
-                .getDistance(visionPose.getTranslation());
-        int numberOfTargetsVisible = m_vision.getNumberOfTargetsVisible();
-        double bestTargetArea = m_vision.getBestTargetArea();
-        double visionLatensy = m_vision.getPoseLatensy();
-
-        SmartDashboard.putNumber("LL: Pose Difference", poseDifference);
-        SmartDashboard.putNumber("LL: Num Visable Targets", numberOfTargetsVisible);
-        SmartDashboard.putNumber("LL: Best Target Area", bestTargetArea);
-        SmartDashboard.putNumber("LL: latensy", visionLatensy);
-
+                .getDistance(visionPose.pose.getTranslation());
         double xyStds = 0.75;
         double degStds = 9;
-        if (numberOfTargetsVisible >= 2) {
+        if (visionPose.tagCount >= 2) {
             // multiple targets detected
             xyStds = 0.5;
             degStds = 6;
-        } else if (bestTargetArea > 0.8 && poseDifference < 0.5) {
+        } else if (visionPose.tagSpan > 0.8 && poseDifference < 0.5) {
             // 1 target with large area and close to estimated pose
             xyStds = 1.0;
             degStds = 12;
-        } else if (bestTargetArea > 0.1 && poseDifference < 0.3) {
+        } else if (visionPose.tagSpan > 0.1 && poseDifference < 0.3) {
             // 1 target farther away and estimated pose is close
             xyStds = 2.0;
             degStds = 30;
         }
 
         SmartDashboard.putString("LL: Std Dev", "XY: " + xyStds + ", Deg: " + degStds);
-
         m_poseEstimator.setVisionMeasurementStdDevs(
                 VecBuilder.fill(xyStds, xyStds, Units.degreesToRadians(degStds)));
-        m_poseEstimator.addVisionMeasurement(visionPose,
-                Timer.getFPGATimestamp() - visionLatensy / 1000.0);
+        m_poseEstimator.addVisionMeasurement(visionPose.pose,
+                visionPose.timestampSeconds);
     }
 
     @Override

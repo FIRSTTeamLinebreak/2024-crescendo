@@ -134,9 +134,6 @@ public class RobotContainer {
         m_launcher.enableRotationPID();
         m_elevator.enable();
         return autoChooser.getSelected();
-        // return new JoystickDriveCommand(m_swerveDrive, () -> -0.25, () -> 0.0, () ->
-        // 0.0, () -> true).withTimeout(0.25);
-        // return new InstantCommand();
     }
 
     public void initTeleop() {
@@ -151,7 +148,6 @@ public class RobotContainer {
         m_elevator.enable();
 
         m_scoreController.povDown().onTrue(new InstantCommand(scheduler::cancelAll));
-
         m_scoreController.b().onTrue(m_launcher.launchCommand());
 
         // Intake Command
@@ -173,7 +169,7 @@ public class RobotContainer {
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
-                new visionLauncherRotation(m_launcher, m_vision, m_elevator));
+                new visionLauncherRotation(m_launcher, m_elevator, m_odometry, m_vision));
 
         // Trap
         m_scoreController.povRight().onTrue(

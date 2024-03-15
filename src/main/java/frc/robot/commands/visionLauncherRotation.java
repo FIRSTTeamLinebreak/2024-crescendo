@@ -1,10 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
+import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Vision;
 
 public class visionLauncherRotation extends Command {
@@ -13,18 +15,18 @@ public class visionLauncherRotation extends Command {
     // private final double maxLauncherSetpoint = .9;
     private final Launcher m_launcher;
     private final Elevator m_elevator;
+    private final Odometry m_odometry;
     private final Vision m_vision;
-    private final LinearFilter filter;
-    private double lastTagSeen = 0.0;
+    
+    private int lastTagSeen = 0;
 
-    public visionLauncherRotation(Launcher m_launcher, Vision m_vision, Elevator m_elevator) {
+    public visionLauncherRotation(Launcher m_launcher, Elevator m_elevator, Odometry m_odometry, Vision m_vision) {
         this.m_launcher = m_launcher;
         this.m_elevator = m_elevator;
+        this.m_odometry = m_odometry;
         this.m_vision = m_vision;
 
-        filter = LinearFilter.movingAverage(10);
-
-        addRequirements(m_launcher, m_elevator, m_vision);
+        addRequirements(m_launcher, m_elevator, m_odometry, m_vision);
     }
 
     /** Called once when the command is initially scheduled. */
@@ -39,7 +41,15 @@ public class visionLauncherRotation extends Command {
         if (((lastTagSeen == 3 || lastTagSeen == 4) // Red Speaker
                 || (lastTagSeen == 7 || lastTagSeen == 8)) // Blue Speaker
                 && m_vision.hasTargets()) {
-            double measurement = filter.calculate(m_vision.getLengthToBase());
+            Pose2d pose = m_odometry.getRobotPose();
+            Translation2d speakerPose;
+            if (m_odometry.getAlliance()) {
+                speakerPose = new Translation2d(8.308467, 1.442593);
+            }
+            else {
+                speakerPose = new Translation2d(-8.308975, 1.442593);
+            }
+            double measurement = pose.getTranslation().getDistance(speakerPose);
             double angle = (Math.tanh(1.71 / (measurement - .31)) + (Math.PI / 2)) / Math.PI;
 
             m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));

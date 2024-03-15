@@ -21,7 +21,7 @@ public class AutoNoteLaunch extends SequentialCommandGroup {
         m_vision = vision;
 
         addCommands(
-            new visionLauncherRotation(m_launcher, m_vision, m_elevator).withTimeout(1),
+            new visionLauncherRotation(m_launcher, m_elevator, m_swerveDrive.getOdometry(), m_vision).withTimeout(1),
             new InstantCommand(() -> m_launcher.setLauncherSpeed(-1.0)).repeatedly().withTimeout(0.5),
             new InstantCommand(() -> m_launcher.setControlSpeed(-1.0)).repeatedly().withTimeout(1.0),
             new InstantCommand(() -> m_launcher.setControlSpeed(0.0)),
