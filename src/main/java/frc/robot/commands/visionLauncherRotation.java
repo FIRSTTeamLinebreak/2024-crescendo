@@ -79,7 +79,7 @@ public class visionLauncherRotation extends Command {
     @Override
     public void end(boolean interrupted) {
         // Returning from Speaker
-        if(lastTagSeen == 3 || lastTagSeen == 4 || lastTagSeen == 7 || lastTagSeen == 8) {
+        if(isSpeaker(lastTagSeen)) {
             m_launcher.setRotationSetpoint(1.0);
             return;
         }
