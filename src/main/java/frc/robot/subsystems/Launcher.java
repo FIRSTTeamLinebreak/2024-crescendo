@@ -2,12 +2,14 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+
+import static frc.robot.Util.isTrap;
+
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -77,9 +79,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public double getMeasurement() {
-        double measurement = rotationEncoder.get();
-        SmartDashboard.putNumber("Claw Raw Encoder", measurement);
-        return 1 - (measurement - encoderOffest) * 2;
+        return 1 - (rotationEncoder.get() - encoderOffest) * 2;
     }
 
     public void setRotationSetpoint(double setpoint) {
@@ -120,10 +120,6 @@ public class Launcher extends SubsystemBase {
         flyWheelFollower.set(-launcherSpeed);
         controlWheels.set(controlSpeed);
 
-        SmartDashboard.putNumber("Claw Rotation", getMeasurement());
-        SmartDashboard.putNumber("Claw Setpoint", rotationSetpoint);
-        SmartDashboard.putNumber("encoderposition", rotationEncoder.get());
-
         if (rotationPIDEnabled) {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
             double clampedSpeed = MathUtil.clamp(calculatedSpeed, -0.5, 0.5);
@@ -142,16 +138,22 @@ public class Launcher extends SubsystemBase {
                 .until(this::rotationAtSetpoint);
     }
 
-    public Command launchCommand() {
+    public Command launchCommand(int lastTagSeen) {
+        Command finishLaunch = new InstantCommand(() -> {
+            this.setControlSpeed(0.0);
+            this.setLauncherSpeed(0.0);
+        });
+        if (isTrap(lastTagSeen)) {
+            return new InstantCommand(() -> {
+                this.setLauncherSpeed(-0.5);
+            }).repeatedly().withTimeout(0.5).andThen(new InstantCommand(() -> {
+                this.setControlSpeed(-0.5);
+            }).repeatedly().withTimeout(0.25), finishLaunch);
+        }
         return new InstantCommand(() -> {
             this.setLauncherSpeed(-1.0);
-        }).repeatedly().withTimeout(0.5)
-                .andThen(new InstantCommand(() -> {
-                    this.setControlSpeed(-1.0);
-                })).repeatedly().withTimeout(1.0)
-                .andThen(new InstantCommand(() -> {
-                    this.setControlSpeed(0.0);
-                    this.setLauncherSpeed(0.0);
-                }));
+        }).repeatedly().withTimeout(0.5).andThen(new InstantCommand(() -> {
+            this.setControlSpeed(-1.0);
+        }).repeatedly().withTimeout(0.25), finishLaunch);
     }
 }

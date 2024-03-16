@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
@@ -22,13 +21,10 @@ public class AutoNoteLaunch extends SequentialCommandGroup {
 
         addCommands(
             new visionLauncherRotation(m_launcher, m_elevator, m_swerveDrive.getOdometry(), m_vision).withTimeout(1),
-            new InstantCommand(() -> m_launcher.setLauncherSpeed(-1.0)).repeatedly().withTimeout(0.5),
-            new InstantCommand(() -> m_launcher.setControlSpeed(-1.0)).repeatedly().withTimeout(1.0),
-            new InstantCommand(() -> m_launcher.setControlSpeed(0.0)),
-            new InstantCommand(() -> m_launcher.setLauncherSpeed(0.0))
+            m_launcher.launchCommand(m_vision.lastTagSeen())
         );
 
-        addRequirements(m_elevator, m_launcher, m_swerveDrive);
+        addRequirements(m_elevator, m_launcher, m_swerveDrive, m_swerveDrive.getOdometry(), m_vision);
     }
 
 }

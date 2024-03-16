@@ -10,7 +10,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
@@ -34,7 +33,9 @@ public class Odometry extends SubsystemBase {
         m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics.driveKinematics,
                 m_driveSubsystem.getRotation2d(),
                 m_driveSubsystem.getModulePositions(),
-                new Pose2d(2.0, 2.0, new Rotation2d()));
+                this.getAlliance()
+                        ? new Pose2d(16.56, 2.15, new Rotation2d())
+                        : new Pose2d(0.56, 2.15, new Rotation2d(180)));
 
         AutoBuilder.configureHolonomic(
                 this::getRobotPose,
@@ -45,13 +46,7 @@ public class Odometry extends SubsystemBase {
                 m_driveSubsystem::getRobotRelativeSpeeds,
                 m_driveSubsystem::setSpeed,
                 SwerveConstants.HolonomicConfig,
-                () -> {
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
+                this::getAlliance,
                 m_driveSubsystem);
     }
 
@@ -63,6 +58,7 @@ public class Odometry extends SubsystemBase {
 
     /**
      * Get the Robots alliance color
+     * 
      * @return true if red alliance, false if blue alliance
      */
     public boolean getAlliance() {
@@ -84,8 +80,8 @@ public class Odometry extends SubsystemBase {
         // distance from current pose to vision estimated pose
         double poseDifference = m_poseEstimator.getEstimatedPosition().getTranslation()
                 .getDistance(visionPose.pose.getTranslation());
-        double xyStds = 0.75;
-        double degStds = 9;
+        double xyStds = 50;
+        double degStds = 600;
         if (visionPose.tagCount >= 2) {
             // multiple targets detected
             xyStds = 0.5;
@@ -100,7 +96,6 @@ public class Odometry extends SubsystemBase {
             degStds = 30;
         }
 
-        SmartDashboard.putString("LL: Std Dev", "XY: " + xyStds + ", Deg: " + degStds);
         m_poseEstimator.setVisionMeasurementStdDevs(
                 VecBuilder.fill(xyStds, xyStds, Units.degreesToRadians(degStds)));
         m_poseEstimator.addVisionMeasurement(visionPose.pose,

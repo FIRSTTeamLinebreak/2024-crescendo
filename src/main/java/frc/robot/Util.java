@@ -31,4 +31,20 @@ public class Util {
 
         return magnitude > deadZone ? ret : zero;
     }
+    
+    public static boolean isSource(int id) {
+        return id == 1 || id == 2 || id == 9 || id == 10;
+    }
+
+    public static boolean isSpeaker(int id) {
+        return id == 3 || id == 4 || id == 7 || id == 8;
+    }
+
+    public static boolean isAmp(int id) {
+        return id == 5 || id == 6;
+    }
+
+    public static boolean isTrap(int id) {
+        return id == 11 || id == 12 || id == 13 || id == 14 || id == 15 || id == 16;
+    }
 }

@@ -122,7 +122,6 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser();
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
-        System.out.println(SmartDashboard.getData("Auto Chooser"));
     }
 
     /**
@@ -148,7 +147,7 @@ public class RobotContainer {
         m_elevator.enable();
 
         m_scoreController.povDown().onTrue(new InstantCommand(scheduler::cancelAll));
-        m_scoreController.b().onTrue(m_launcher.launchCommand());
+        m_scoreController.b().onTrue(m_launcher.launchCommand(m_vision.lastTagSeen()));
 
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
@@ -221,7 +220,6 @@ public class RobotContainer {
         }).repeatedly();
         launcherCommand.addRequirements(m_launcher);
         m_launcher.setDefaultCommand(launcherCommand);
-        new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", m_launcher.getMeasurement()));
     }
 
     public void initTest() {
@@ -259,7 +257,6 @@ public class RobotContainer {
         }).repeatedly();
         launcherCommand.addRequirements(m_launcher);
         m_launcher.setDefaultCommand(launcherCommand);
-        new InstantCommand(() -> SmartDashboard.putNumber("Claw Mesurment", m_launcher.getMeasurement()));
     }
 
     public void disable() {

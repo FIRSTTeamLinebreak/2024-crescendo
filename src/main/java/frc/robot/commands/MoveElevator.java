@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
@@ -43,7 +42,6 @@ public class MoveElevator extends Command {
      */
     @Override
     public boolean isFinished() {
-        SmartDashboard.putBoolean("Move Elevator Finished?", m_elevator.atSetpoint());
         return m_elevator.atSetpoint();
     }
 }

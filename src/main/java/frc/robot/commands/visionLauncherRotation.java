@@ -1,8 +1,13 @@
 package frc.robot.commands;
 
+import static frc.robot.Util.isAmp;
+import static frc.robot.Util.isSpeaker;
+import static frc.robot.Util.isTrap;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Launcher;
@@ -10,9 +15,6 @@ import frc.robot.subsystems.Odometry;
 import frc.robot.subsystems.Vision;
 
 public class visionLauncherRotation extends Command {
-
-    // private final double minLauncherSetpoint = .85;
-    // private final double maxLauncherSetpoint = .9;
     private final Launcher m_launcher;
     private final Elevator m_elevator;
     private final Odometry m_odometry;
@@ -38,33 +40,28 @@ public class visionLauncherRotation extends Command {
     /** Called repeatedly while the command is scheduled. */
     @Override
     public void execute() {
-        if (((lastTagSeen == 3 || lastTagSeen == 4) // Red Speaker
-                || (lastTagSeen == 7 || lastTagSeen == 8)) // Blue Speaker
-                && m_vision.hasTargets()) {
+        if (isSpeaker(lastTagSeen) && m_vision.hasTargets()) {
             Pose2d pose = m_odometry.getRobotPose();
             Translation2d speakerPose;
             if (m_odometry.getAlliance()) {
-                speakerPose = new Translation2d(8.308467, 1.442593);
+                speakerPose = new Translation2d(16.57, 5.547868);
             }
             else {
-                speakerPose = new Translation2d(-8.308975, 1.442593);
+                speakerPose = new Translation2d(0.0, 5.547868);
             }
             double measurement = pose.getTranslation().getDistance(speakerPose);
+            SmartDashboard.putNumber("Distance", measurement);
             double angle = (Math.tanh(1.71 / (measurement - .31)) + (Math.PI / 2)) / Math.PI;
 
             m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));
         }
 
-        else if (((lastTagSeen == 5) // Red Amp
-                || (lastTagSeen == 6)) // Blue Amp
-        ) {
+        else if (isAmp(lastTagSeen)) {
             m_elevator.setPoint(100);
             m_launcher.setRotationSetpoint(0.27);
         }
 
-        else if ((lastTagSeen == 11 || lastTagSeen == 12 || lastTagSeen == 13) // Red Trap
-                || (lastTagSeen == 14 || lastTagSeen == 15 || lastTagSeen == 16) // Blue Trap
-        ) {
+        else if (isTrap(lastTagSeen)) {
             m_elevator.setPoint(48);
             m_launcher.setRotationSetpoint(.905);
         }

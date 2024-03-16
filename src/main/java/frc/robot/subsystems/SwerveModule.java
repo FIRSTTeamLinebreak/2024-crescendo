@@ -13,7 +13,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
 /** An individual swerve module. */
@@ -118,7 +117,6 @@ public class SwerveModule {
          * @return Turning motor position
          */
         public double getTurningPosition() {
-                SmartDashboard.putNumber("" + this.canCoder.getDeviceID(), canCoder.getPosition().getValueAsDouble());
                 return canCoder.getPosition().getValueAsDouble() - canCoderOffset;
         }
 
@@ -137,6 +135,6 @@ public class SwerveModule {
                 return new SwerveModulePosition(
                                 driveController.getPosition().getValueAsDouble()
                                                 * SwerveConstants.Kinematics.driveRotToMeters,
-                                new Rotation2d(getTurningPosition() * 2 * Math.PI));
+                                new Rotation2d(getTurningPosition() * 2 * Math.PI + Math.PI));
         }
 }
