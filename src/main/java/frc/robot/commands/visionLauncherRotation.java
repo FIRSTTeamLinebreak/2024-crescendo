@@ -19,14 +19,17 @@ public class visionLauncherRotation extends Command {
     private final Elevator m_elevator;
     private final Odometry m_odometry;
     private final Vision m_vision;
-    
+    private final boolean stow;
+
     private int lastTagSeen = 0;
 
-    public visionLauncherRotation(Launcher m_launcher, Elevator m_elevator, Odometry m_odometry, Vision m_vision) {
+    public visionLauncherRotation(Launcher m_launcher, Elevator m_elevator, Odometry m_odometry, Vision m_vision,
+            boolean stow) {
         this.m_launcher = m_launcher;
         this.m_elevator = m_elevator;
         this.m_odometry = m_odometry;
         this.m_vision = m_vision;
+        this.stow = stow;
 
         addRequirements(m_launcher, m_elevator, m_odometry, m_vision);
     }
@@ -42,16 +45,12 @@ public class visionLauncherRotation extends Command {
     public void execute() {
         if (isSpeaker(lastTagSeen) && m_vision.hasTargets()) {
             Pose2d pose = m_odometry.getRobotPose();
-            Translation2d speakerPose;
-            if (m_odometry.getAlliance()) {
-                speakerPose = new Translation2d(16.57, 5.547868);
-            }
-            else {
-                speakerPose = new Translation2d(0.0, 5.547868);
-            }
+            Translation2d speakerPose = m_odometry.getAlliance()
+                    ? new Translation2d(16.57, 5.547868)
+                    : new Translation2d(0.0, 5.547868);
             double measurement = pose.getTranslation().getDistance(speakerPose);
             SmartDashboard.putNumber("Distance", measurement);
-            double angle = (Math.tanh(1.71 / (measurement - .31)) + (Math.PI / 2)) / Math.PI;
+            double angle = (Math.tanh(1.71 / (measurement - 0.31)) + (Math.PI / 2)) / Math.PI;
 
             m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));
         }
@@ -79,12 +78,14 @@ public class visionLauncherRotation extends Command {
     @Override
     public void end(boolean interrupted) {
         // Returning from Speaker
-        if(isSpeaker(lastTagSeen)) {
+        if (stow) {
+            if (isSpeaker(lastTagSeen)) {
+                m_launcher.setRotationSetpoint(1.0);
+                return;
+            }
             m_launcher.setRotationSetpoint(1.0);
-            return;
+            m_elevator.setPoint(10);
         }
-        m_launcher.setRotationSetpoint(1.0);
-        m_elevator.setPoint(10);
     }
 
     /**

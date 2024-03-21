@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveConstants.Kinematics;
@@ -35,7 +36,7 @@ public class Odometry extends SubsystemBase {
                 m_driveSubsystem.getModulePositions(),
                 this.getAlliance()
                         ? new Pose2d(16.56, 2.15, new Rotation2d())
-                        : new Pose2d(0.56, 2.15, new Rotation2d(180)));
+                        : new Pose2d(0.56, 2.15, new Rotation2d(Math.PI)));
 
         AutoBuilder.configureHolonomic(
                 this::getRobotPose,
@@ -109,6 +110,8 @@ public class Odometry extends SubsystemBase {
                 m_driveSubsystem.getModulePositions());
 
         updatePoseEstimatorWithVisionBotPose();
+
+        SmartDashboard.putBoolean("Aliance", getAlliance());
     }
 
 }

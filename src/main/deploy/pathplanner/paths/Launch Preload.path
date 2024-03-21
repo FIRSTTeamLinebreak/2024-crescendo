@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1367081625696045,
-        "y": 2.7411080712071207
+        "x": 0.4,
+        "y": 3.72
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1367081625696054,
-        "y": 2.7411080712071207
+        "x": 1.4000000000000008,
+        "y": 3.72
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Starting Pose"
     },
     {
       "anchor": {
-        "x": 2.0,
-        "y": 5.512923446208909
+        "x": 1.7939520848919563,
+        "y": 4.582957911308099
       },
       "prevControl": {
-        "x": 1.0,
-        "y": 5.512923446208909
+        "x": 1.7939520848919563,
+        "y": 3.668464032458293
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Note Launch"
     }
   ],
   "rotationTargets": [],
@@ -33,13 +33,13 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
+    "rotation": -20.0,
     "rotateFast": false
   },
   "reversed": false,

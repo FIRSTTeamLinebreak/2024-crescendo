@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,7 +36,7 @@ public class Launcher extends SubsystemBase {
     private double controlSpeed = 0.0;
     private double rotationSetpoint;
 
-    private double upperLimit = 1.0;
+    private double upperLimit = 0.95;
     private double lowerLimit = 0.02;
 
     public Launcher(
@@ -79,7 +80,12 @@ public class Launcher extends SubsystemBase {
     }
 
     public double getMeasurement() {
-        return 1 - (rotationEncoder.get() - encoderOffest) * 2;
+        double measurement = (1 - (rotationEncoder.get() - encoderOffest) * 2);
+        double whole = (int)measurement;
+        if (measurement >= 1.2) {
+            return measurement - whole;
+        }
+        return measurement;
     }
 
     public void setRotationSetpoint(double setpoint) {
@@ -116,6 +122,11 @@ public class Launcher extends SubsystemBase {
     /** Run approx. every 20 ms. */
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Claw Rotation", getMeasurement());
+        if (!rotationEncoder.isConnected()) {
+            launcherRotation.set(0.0);
+            return;
+        }
         flyWheelLeader.set(launcherSpeed);
         flyWheelFollower.set(-launcherSpeed);
         controlWheels.set(controlSpeed);
@@ -124,7 +135,8 @@ public class Launcher extends SubsystemBase {
             double calculatedSpeed = rotationPID.calculate(getMeasurement(), rotationSetpoint);
             double clampedSpeed = MathUtil.clamp(calculatedSpeed, -0.5, 0.5);
             double feedForward = Math.abs(Math.sin(getMeasurement() * Math.PI) * PID.ClawRotation.kFF);
-            if (this.getMeasurement() > 1.0 && (calculatedSpeed + feedForward) > 1.0) {
+            if (this.getMeasurement() > upperLimit && (calculatedSpeed + feedForward) > 0.0) {
+                launcherRotation.set(0.0);
                 return;
             }
             launcherRotation.set(clampedSpeed + feedForward);
@@ -152,7 +164,7 @@ public class Launcher extends SubsystemBase {
         }
         return new InstantCommand(() -> {
             this.setLauncherSpeed(-1.0);
-        }).repeatedly().withTimeout(0.5).andThen(new InstantCommand(() -> {
+        }).repeatedly().withTimeout(0.75).andThen(new InstantCommand(() -> {
             this.setControlSpeed(-1.0);
         }).repeatedly().withTimeout(0.25), finishLaunch);
     }
