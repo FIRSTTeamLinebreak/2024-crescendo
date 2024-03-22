@@ -152,20 +152,15 @@ public class RobotContainer {
 
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
-                new InstantCommand(() -> {
-                    if (!(m_elevator.atPoint(10) && m_launcher.atPoint(1.0))) {
-                        new InstantCommand(scheduler::cancelAll);
-                    }
-                })
-                        .andThen(
-                                (m_elevator.moveToSetpoint(50)
-                                        .alongWith(m_launcher.moveClawToSetpoint(0.65))
-                                        .andThen(m_launcher.moveClawToSetpoint(0.07))
-                                        .andThen(m_elevator.moveToSetpoint(37))).alongWith(new InstantCommand(() -> {
-                                            m_launcher.setLauncherSpeed(0.37);
-                                            m_launcher.setControlSpeed(0.1);
-                                            m_intake.setSpeed(0.45);
-                                        }))));
+                m_elevator.moveToSetpoint(50)
+                        .alongWith(m_launcher.moveClawToSetpoint(0.60).withTimeout(0.75))
+                        .andThen(m_launcher.moveClawToSetpoint(0.05).withTimeout(0.5))
+                        .andThen(m_elevator.moveToSetpoint(35))
+                        .andThen(new InstantCommand(() -> {
+                            m_launcher.setLauncherSpeed(0.47);
+                            m_launcher.setControlSpeed(0.1);
+                            m_intake.setSpeed(0.45);
+                        })));
 
         // Enable Intake Weeks
         m_scoreController.leftBumper().onTrue(new InstantCommand(() -> {
@@ -180,23 +175,19 @@ public class RobotContainer {
 
         // stow
         m_scoreController.rightBumper().onTrue(
-                new InstantCommand(() -> {
-                    if (m_elevator.atPoint(10) && m_launcher.atPoint(1.0)) {
-                        new InstantCommand(scheduler::cancelAll);
-                    }
-                })
-                        .andThen(
-                                m_elevator.moveToSetpoint(50)
-                                        .andThen(m_launcher.moveClawToSetpoint(1.0)
-                                                .alongWith(m_elevator.moveToSetpoint(10)))
-                                        .alongWith(
-                                                new InstantCommand(() -> {
-                                                    m_launcher.setLauncherSpeed(0.0);
-                                                    m_launcher.setControlSpeed(0.05);
-                                                    m_intake.setSpeed(0.0);
-                                                }))));
+                m_elevator.moveToSetpoint(50)
+                        .andThen(m_launcher.moveClawToSetpoint(0.98).withTimeout(0.5))
+                        .andThen(m_elevator.moveToSetpoint(10))
+                        .alongWith(
+                                new InstantCommand(() -> {
+                                    m_launcher.setLauncherSpeed(0.0);
+                                    m_launcher.setControlSpeed(0.05);
+                                    m_intake.setSpeed(0.0);
+                                })));
 
-        m_scoreController.povUp().onTrue(m_elevator.moveToSetpoint(100).andThen(m_launcher.moveClawToSetpoint(0.5)));
+        m_scoreController.povUp().onTrue(m_elevator.moveToSetpoint(50).andThen(
+                m_launcher.moveClawToSetpoint(0.5).withTimeout(1),
+                m_elevator.moveToSetpoint(100)));
 
         Command elevatorCommand = new InstantCommand(() -> {
             double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getLeftY())

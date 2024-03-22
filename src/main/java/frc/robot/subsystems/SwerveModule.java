@@ -9,7 +9,6 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -87,9 +86,8 @@ public class SwerveModule {
         public void setState(SwerveModuleState state) {
                 this.state = SwerveModuleState.optimize(
                                 state, Rotation2d.fromRadians(getTurningPosition() * 2 * Math.PI));
-                double driveSpeed = this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed;
                 
-                driveController.set(MathUtil.clamp(driveSpeed, -0.25, 0.25));
+                driveController.set(this.state.speedMetersPerSecond / SwerveConstants.Kinematics.drivePhysicalMaxSpeed);
                 turningController.set(
                                 turningPid.calculate(
                                                 getTurningPosition(), this.state.angle.getRadians() / (2 * Math.PI)));

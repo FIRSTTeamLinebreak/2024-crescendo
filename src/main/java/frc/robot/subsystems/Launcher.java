@@ -36,7 +36,7 @@ public class Launcher extends SubsystemBase {
     private double controlSpeed = 0.0;
     private double rotationSetpoint;
 
-    private double upperLimit = 0.95;
+    private double upperLimit = 0.97;
     private double lowerLimit = 0.02;
 
     public Launcher(
@@ -156,10 +156,11 @@ public class Launcher extends SubsystemBase {
             this.setLauncherSpeed(0.0);
         });
         if (isTrap(lastTagSeen)) {
+            System.out.println("Shooting Trap");
             return new InstantCommand(() -> {
-                this.setLauncherSpeed(-0.5);
+                this.setLauncherSpeed(-0.19);
             }).repeatedly().withTimeout(0.5).andThen(new InstantCommand(() -> {
-                this.setControlSpeed(-0.5);
+                this.setControlSpeed(-0.19);
             }).repeatedly().withTimeout(0.25), finishLaunch);
         }
         return new InstantCommand(() -> {

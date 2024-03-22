@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
@@ -15,6 +16,7 @@ public class Vision extends SubsystemBase {
     /** Run approx. every 20 ms. */
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Last Tag Seen", lastTagSeen);
         results = LimelightHelpers.getLatestResults("limelight");
         lastTagSeen = results.targetingResults.targets_Fiducials.length > 0 ? results.targetingResults.targets_Fiducials[0].fiducialID : lastTagSeen;
     }

@@ -79,6 +79,9 @@ public class visionLauncherRotation extends Command {
     public void end(boolean interrupted) {
         // Returning from Speaker
         if (stow) {
+            if (isTrap(lastTagSeen)) {
+                return;
+            }
             if (isSpeaker(lastTagSeen)) {
                 m_launcher.setRotationSetpoint(1.0);
                 return;
