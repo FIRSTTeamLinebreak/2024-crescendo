@@ -69,7 +69,13 @@ public class RobotContainer {
         m_driveController = new CommandXboxController(JoystickConstants.driveControllerId);
         m_scoreController = new CommandXboxController(JoystickConstants.scoreControllerId);
         m_SwerveDriveCommand = new JoystickDriveCommand(m_swerveDrive,
-                () -> m_driveController.getLeftY(), () -> m_driveController.getLeftX(), () -> {
+                () -> {
+                    return m_driveController.getLeftY() 
+                            / (m_driveController.x().getAsBoolean() ? 0.25 : 1.0);
+                }, () -> {
+                    return m_driveController.getLeftX() 
+                            / (m_driveController.x().getAsBoolean() ? 0.25 : 1.0);
+                }, () -> {
                     // Rotation
                     double angle = m_odometry.getRobotPose().getRotation().getRadians();
                     SmartDashboard.putNumber("angle", angle);

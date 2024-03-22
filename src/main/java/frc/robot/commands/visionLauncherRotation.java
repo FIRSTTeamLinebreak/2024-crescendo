@@ -50,7 +50,7 @@ public class visionLauncherRotation extends Command {
                     : new Translation2d(0.0, 5.547868);
             double measurement = pose.getTranslation().getDistance(speakerPose);
             SmartDashboard.putNumber("Distance", measurement);
-            double angle = (Math.tanh(1.71 / (measurement - 0.31)) + (Math.PI / 2)) / Math.PI;
+            double angle = Math.atan(1.71 / (measurement - 0.31)) / Math.PI / 2 + 0.5;
 
             m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));
         }
@@ -61,8 +61,8 @@ public class visionLauncherRotation extends Command {
         }
 
         else if (isTrap(lastTagSeen)) {
-            m_elevator.setPoint(48);
-            m_launcher.setRotationSetpoint(.905);
+            m_elevator.setPoint(45);
+            m_launcher.setRotationSetpoint(.89);
         }
     }
 
