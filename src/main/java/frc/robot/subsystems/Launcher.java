@@ -158,9 +158,9 @@ public class Launcher extends SubsystemBase {
         if (isTrap(lastTagSeen)) {
             System.out.println("Shooting Trap");
             return new InstantCommand(() -> {
-                this.setLauncherSpeed(-0.19);
+                this.setLauncherSpeed(-0.27);
             }).repeatedly().withTimeout(0.5).andThen(new InstantCommand(() -> {
-                this.setControlSpeed(-0.19);
+                this.setControlSpeed(-0.27);
             }).repeatedly().withTimeout(0.25), finishLaunch);
         }
         return new InstantCommand(() -> {

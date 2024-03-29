@@ -1,0 +1,97 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.2554654495899562,
+      "y": 5.58606903233778
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoNoteLaunch"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 1 Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartAutoIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoStow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 1 End"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoNoteLaunch"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 2 Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartAutoIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoStow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake Speaker 2 End"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoNoteLaunch"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

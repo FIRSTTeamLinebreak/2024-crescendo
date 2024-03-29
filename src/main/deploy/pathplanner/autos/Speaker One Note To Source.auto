@@ -5,27 +5,27 @@
       "x": 0.4,
       "y": 3.72
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Launch Preload"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "AutoNoteLaunch"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Leave From Speaker"
           }
         }
       ]
     }
   },
-  "folder": "New Folder",
+  "folder": null,
   "choreoAuto": false
 }

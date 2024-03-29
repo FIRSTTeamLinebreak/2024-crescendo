@@ -70,10 +70,10 @@ public class RobotContainer {
         m_scoreController = new CommandXboxController(JoystickConstants.scoreControllerId);
         m_SwerveDriveCommand = new JoystickDriveCommand(m_swerveDrive,
                 () -> {
-                    return m_driveController.getLeftY() 
+                    return m_driveController.getLeftY()
                             / (m_driveController.x().getAsBoolean() ? 0.25 : 1.0);
                 }, () -> {
-                    return m_driveController.getLeftX() 
+                    return m_driveController.getLeftX()
                             / (m_driveController.x().getAsBoolean() ? 0.25 : 1.0);
                 }, () -> {
                     // Rotation
@@ -96,13 +96,14 @@ public class RobotContainer {
                             JoystickConstants.joystickDeadZone, m_driveController.getRightX());
                 }, () -> !m_driveController.getHID().getRightBumper());
 
-        NamedCommands.registerCommand("AutoNoteLaunch",
-                new AutoNoteLaunch(m_swerveDrive, m_elevator, m_launcher, m_vision));
-        NamedCommands.registerCommand("StartAutoIntake", (m_elevator.moveToSetpoint(50)
-                .alongWith(m_launcher.moveClawToSetpoint(0.5).withTimeout(1))
-                .andThen(m_launcher.moveClawToSetpoint(0.07))
-                .andThen(m_elevator.moveToSetpoint(37))).alongWith(new InstantCommand(() -> {
-                    m_launcher.setLauncherSpeed(0.37);
+        NamedCommands.registerCommand("AutoNoteLaunch", new InstantCommand(
+                () -> new AutoNoteLaunch(m_swerveDrive, m_elevator, m_launcher, m_vision).schedule()));
+        NamedCommands.registerCommand("StartAutoIntake", m_elevator.moveToSetpoint(50)
+                .alongWith(m_launcher.moveClawToSetpoint(0.60).withTimeout(0.75))
+                .andThen(m_launcher.moveClawToSetpoint(0.05).withTimeout(0.5))
+                .andThen(m_elevator.moveToSetpoint(35))
+                .andThen(new InstantCommand(() -> {
+                    m_launcher.setLauncherSpeed(0.47);
                     m_launcher.setControlSpeed(0.1);
                     m_intake.setSpeed(0.45);
                 })));
@@ -139,6 +140,8 @@ public class RobotContainer {
         m_launcher.enableRotationPID();
         m_elevator.enable();
         m_launcher.setControlSpeed(0.05);
+        m_elevator.setPoint(10);
+        m_launcher.setRotationSetpoint(0.95);
         return autoChooser.getSelected();
     }
 
@@ -153,8 +156,16 @@ public class RobotContainer {
         m_launcher.enableRotationPID();
         m_elevator.enable();
 
+        m_scoreController.povUp().onTrue(m_elevator.moveToSetpoint(50).andThen(
+                m_launcher.moveClawToSetpoint(0.27).withTimeout(1),
+                m_elevator.moveToSetpoint(100)));
+        m_scoreController.povRight()
+                .whileTrue(new visionLauncherRotation(m_launcher, m_elevator, m_odometry, m_vision, true, true, false));
+        m_scoreController.povLeft().whileTrue(
+                new visionLauncherRotation(m_launcher, m_elevator, m_odometry, m_vision, false, false, true));
         m_scoreController.povDown().onTrue(new InstantCommand(scheduler::cancelAll));
-        m_scoreController.b().onTrue(m_launcher.launchCommand(m_vision.lastTagSeen()));
+        m_scoreController.b()
+                .onTrue(new InstantCommand(() -> m_launcher.launchCommand(m_vision.lastTagSeen()).schedule()));
 
         // Intake Command
         m_scoreController.leftTrigger().onTrue(
@@ -177,7 +188,7 @@ public class RobotContainer {
 
         // Launcher Command
         m_scoreController.rightTrigger().whileTrue(
-                new visionLauncherRotation(m_launcher, m_elevator, m_odometry, m_vision, true));
+                new visionLauncherRotation(m_launcher, m_elevator, m_odometry, m_vision, true, false, false));
 
         // stow
         m_scoreController.rightBumper().onTrue(
@@ -190,10 +201,6 @@ public class RobotContainer {
                                     m_launcher.setControlSpeed(0.05);
                                     m_intake.setSpeed(0.0);
                                 })));
-
-        m_scoreController.povUp().onTrue(m_elevator.moveToSetpoint(50).andThen(
-                m_launcher.moveClawToSetpoint(0.5).withTimeout(1),
-                m_elevator.moveToSetpoint(100)));
 
         Command elevatorCommand = new InstantCommand(() -> {
             double joystickValue = applyLinearDeadZone(JoystickConstants.joystickDeadZone, m_scoreController.getLeftY())

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.4,
-      "y": 3.72
+      "x": 1.9346939692452838,
+      "y": 4.403274541213847
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,18 +14,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Launch Preload"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AutoNoteLaunch"
+            "pathName": "Troll"
           }
         }
       ]
     }
   },
-  "folder": "New Folder",
+  "folder": null,
   "choreoAuto": false
 }

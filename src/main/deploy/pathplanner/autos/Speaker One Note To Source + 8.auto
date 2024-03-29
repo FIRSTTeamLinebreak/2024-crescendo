@@ -2,19 +2,19 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.4,
-      "y": 3.72
+      "x": 1.2554654495899562,
+      "y": 5.58606903233778
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "Launch Preload"
+            "waitTime": 8.0
           }
         },
         {
@@ -22,10 +22,16 @@
           "data": {
             "name": "AutoNoteLaunch"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Leave From Speaker"
+          }
         }
       ]
     }
   },
-  "folder": "New Folder",
+  "folder": null,
   "choreoAuto": false
 }

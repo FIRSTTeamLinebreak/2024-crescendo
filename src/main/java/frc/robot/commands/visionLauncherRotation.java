@@ -20,16 +20,20 @@ public class visionLauncherRotation extends Command {
     private final Odometry m_odometry;
     private final Vision m_vision;
     private final boolean stow;
+    private final boolean speakerOnly;
+    private final boolean trapOnly;
 
     private int lastTagSeen = 0;
 
     public visionLauncherRotation(Launcher m_launcher, Elevator m_elevator, Odometry m_odometry, Vision m_vision,
-            boolean stow) {
+            boolean stow, boolean speakerOnly, boolean trapOnly) {
         this.m_launcher = m_launcher;
         this.m_elevator = m_elevator;
         this.m_odometry = m_odometry;
         this.m_vision = m_vision;
         this.stow = stow;
+        this.speakerOnly = speakerOnly;
+        this.trapOnly = trapOnly;
 
         addRequirements(m_launcher, m_elevator, m_odometry, m_vision);
     }
@@ -38,31 +42,33 @@ public class visionLauncherRotation extends Command {
     @Override
     public void initialize() {
         this.lastTagSeen = m_vision.lastTagSeen();
+        if(!speakerOnly && ! trapOnly) {
+            m_vision.enableLight();
+        }
     }
 
     /** Called repeatedly while the command is scheduled. */
     @Override
     public void execute() {
-        if (isSpeaker(lastTagSeen) && m_vision.hasTargets()) {
+        if ((speakerOnly || isSpeaker(lastTagSeen)) && ! trapOnly) {
             Pose2d pose = m_odometry.getRobotPose();
             Translation2d speakerPose = m_odometry.getAlliance()
                     ? new Translation2d(16.57, 5.547868)
                     : new Translation2d(0.0, 5.547868);
             double measurement = pose.getTranslation().getDistance(speakerPose);
             SmartDashboard.putNumber("Distance", measurement);
-            double angle = Math.atan(1.71 / (measurement - 0.31)) / Math.PI / 2 + 0.5;
-
+            // double angle = Math.atan(1.73 / (measurement - 0.34)) / Math.PI + 0.5;
+            double angle = Math.atan(1.73 / (measurement - 0.33)) / Math.PI / 1.5 + 0.6;
+            SmartDashboard.putNumber("angle", angle);
             m_launcher.setRotationSetpoint(MathUtil.clamp(angle, 0.5, 1.0));
         }
-
+        else if (trapOnly || isTrap(lastTagSeen)) {
+            m_elevator.setPoint(45);
+            m_launcher.setRotationSetpoint(.89);
+        }
         else if (isAmp(lastTagSeen)) {
             m_elevator.setPoint(100);
             m_launcher.setRotationSetpoint(0.27);
-        }
-
-        else if (isTrap(lastTagSeen)) {
-            m_elevator.setPoint(45);
-            m_launcher.setRotationSetpoint(.89);
         }
     }
 
@@ -77,6 +83,7 @@ public class visionLauncherRotation extends Command {
      */
     @Override
     public void end(boolean interrupted) {
+        m_vision.disableLight();
         // Returning from Speaker
         if (stow) {
             if (isTrap(lastTagSeen)) {

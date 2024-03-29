@@ -42,6 +42,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "End To Launch"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "AutoNoteLaunch"

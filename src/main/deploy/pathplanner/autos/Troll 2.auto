@@ -5,7 +5,7 @@
       "x": 0.4,
       "y": 3.72
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,18 +14,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Launch Preload"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AutoNoteLaunch"
+            "pathName": "Troll Start"
           }
         }
       ]
     }
   },
-  "folder": "New Folder",
+  "folder": null,
   "choreoAuto": false
 }

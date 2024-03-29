@@ -75,13 +75,13 @@ public final class Constants {
             }
 
             public static final class AutoTranslation {
-                public static final double kP = 5.0;
+                public static final double kP = 1.5;
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
             }
 
             public static final class AutoRotation {
-                public static final double kP = 1.0;
+                public static final double kP = 1.25;
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
             }

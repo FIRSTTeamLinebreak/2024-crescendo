@@ -36,4 +36,12 @@ public class Vision extends SubsystemBase {
     public int lastTagSeen() {
         return (int)lastTagSeen;
     }
+
+    public void enableLight() {
+        LimelightHelpers.setLEDMode_ForceOn("limelight");
+    }
+
+    public void disableLight() {
+        LimelightHelpers.setLEDMode_ForceOff("limelight");
+    }
 }

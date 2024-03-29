@@ -5,7 +5,7 @@
       "x": 0.4,
       "y": 3.72
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -22,10 +22,16 @@
           "data": {
             "name": "AutoNoteLaunch"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Troll"
+          }
         }
       ]
     }
   },
-  "folder": "New Folder",
+  "folder": null,
   "choreoAuto": false
 }
